@@ -37,6 +37,7 @@ require (
 	github.com/hashicorp/go-bexpr v0.1.10
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d
 	github.com/hashicorp/hcl/v2 v2.10.1
+	github.com/holiman/big v0.0.0-20221017200358-a027dc42d04e
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.2.0
 	github.com/huin/goupnp v1.0.3-0.20220313090229-ca81a64b4204
@@ -54,7 +55,7 @@ require (
 	github.com/mitchellh/cli v1.1.2
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/openrelayxyz/plugeth-utils v0.0.23
+	github.com/openrelayxyz/plugeth-utils v0.0.24
 	github.com/peterh/liner v1.1.1-0.20190123174540-a2c9a5303de7
 	github.com/prometheus/tsdb v0.7.1
 	github.com/rjeczalik/notify v0.9.1
