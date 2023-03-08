@@ -782,8 +782,8 @@ func (w *worker) resultLoop() {
 				}
 
 				// Commit block and state to database.
-				tracing.ElapsedTime(ctx, span, "WriteBlockAndSetHead time taken", func(_ context.Context, _ trace.Span) {
-					_, err = w.chain.WriteBlockAndSetHead(block, receipts, logs, task.state, true)
+				tracing.Exec(ctx, "resultLoop.WriteBlockAndSetHead", func(ctx context.Context, span trace.Span) {
+					_, err = w.chain.WriteBlockAndSetHead(ctx, block, receipts, logs, task.state, true)
 				})
 
 				tracing.SetAttributes(
@@ -1314,9 +1314,9 @@ func (w *worker) commit(ctx context.Context, env *environment, interval func(), 
 
 		tracing.SetAttributes(
 			span,
-			attribute.Int("number", int(block.Number().Uint64())),
-			attribute.String("hash", block.Hash().String()),
-			attribute.String("sealhash", w.engine.SealHash(block.Header()).String()),
+			attribute.Int("number", int(env.header.Number.Uint64())),
+			attribute.String("hash", env.header.Hash().String()),
+			attribute.String("sealhash", w.engine.SealHash(env.header).String()),
 			attribute.Int("len of env.txs", len(env.txs)),
 			attribute.Bool("error", err != nil),
 		)
