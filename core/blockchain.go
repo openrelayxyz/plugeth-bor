@@ -79,8 +79,11 @@ var (
 	blockImportTimer     = metrics.NewRegisteredMeter("chain/imports", nil)
 	blockInsertTimer     = metrics.NewRegisteredTimer("chain/inserts", nil)
 	blockValidationTimer = metrics.NewRegisteredTimer("chain/validation", nil)
-	blockExecutionTimer  = metrics.NewRegisteredTimer("chain/execution", nil)
-	blockWriteTimer      = metrics.NewRegisteredTimer("chain/write", nil)
+	//begin PluGeth code injection
+	blockExecutionLatencyTimer = metrics.NewRegisteredTimer("chain/execution/latency", nil)
+	//end PluGeth code injection
+	blockExecutionTimer = metrics.NewRegisteredTimer("chain/execution", nil)
+	blockWriteTimer     = metrics.NewRegisteredTimer("chain/write", nil)
 
 	blockReorgMeter         = metrics.NewRegisteredMeter("chain/reorg/executes", nil)
 	blockReorgAddMeter      = metrics.NewRegisteredMeter("chain/reorg/add", nil)
@@ -1773,6 +1776,10 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, setHead bool)
 
 		// Retrieve the parent block and it's state to execute on top
 		start := time.Now()
+		//begin PluGeth code injection
+		blockExecutionLatencyTimer.Update(time.Since(time.Unix(int64(block.Header().Time), 0))) // Duration since block timestamp before block execution
+		//end PluGeth code injection
+
 		parent := it.previous()
 		if parent == nil {
 			parent = bc.GetHeader(block.ParentHash(), block.NumberU64()-1)
