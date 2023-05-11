@@ -28,7 +28,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.2
-	github.com/golang/snappy v0.0.4
+	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb
 	github.com/google/gofuzz v1.1.1-0.20200604201612-c04b05f3adfa
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/websocket v1.4.2
@@ -39,7 +39,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.10.1
 	github.com/holiman/big v0.0.0-20221017200358-a027dc42d04e
 	github.com/holiman/bloomfilter/v2 v2.0.3
-	github.com/holiman/uint256 v1.2.0
+	github.com/holiman/uint256 v1.2.2-0.20230321075855-87b91420868c
 	github.com/huin/goupnp v1.0.3-0.20220313090229-ca81a64b4204
 	github.com/imdario/mergo v0.3.11
 	github.com/influxdata/influxdb v1.8.3
@@ -55,7 +55,7 @@ require (
 	github.com/mitchellh/cli v1.1.2
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/openrelayxyz/plugeth-utils v0.0.24
+	github.com/openrelayxyz/plugeth-utils v1.1.0
 	github.com/peterh/liner v1.1.1-0.20190123174540-a2c9a5303de7
 	github.com/prometheus/tsdb v0.7.1
 	github.com/rjeczalik/notify v0.9.1
@@ -146,7 +146,7 @@ require (
 	go.opentelemetry.io/proto/otlp v0.10.0 // indirect
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
 	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/net v0.8.0 // indirect
+	golang.org/x/net v0.6.0 // indirect
 	golang.org/x/term v0.6.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
 	google.golang.org/genproto v0.0.0-20220725144611-272f38e5d71b // indirect
@@ -155,3 +155,5 @@ require (
 )
 
 replace github.com/Masterminds/goutils => github.com/Masterminds/goutils v1.1.1
+
+replace golang.org/x/net => golang.org/x/net v0.1.0
