@@ -18,12 +18,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path" // -- PluGeth injection
 	"sort"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -47,6 +49,7 @@ import (
 	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
 	_ "github.com/ethereum/go-ethereum/eth/tracers/native"
 
+	"github.com/maticnetwork/heimdall/cmd/heimdalld/service"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -492,4 +495,9 @@ func unlockAccounts(ctx *cli.Context, stack *node.Node) {
 	for i, account := range unlocks {
 		unlockAccount(ks, account, i, passwords)
 	}
+}
+
+func getHeimdallArgs(ctx *cli.Context) []string {
+	heimdallArgs := strings.Split(ctx.GlobalString(utils.RunHeimdallArgsFlag.Name), ",")
+	return append([]string{"start"}, heimdallArgs...)
 }
