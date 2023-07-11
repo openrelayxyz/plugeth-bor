@@ -25,10 +25,10 @@ require (
 	github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5
 	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08
 	github.com/go-stack/stack v1.8.1
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/golang/mock v1.6.0
-	github.com/golang/protobuf v1.5.2
-	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb
+	github.com/golang/snappy v0.0.4
 	github.com/google/gofuzz v1.1.1-0.20200604201612-c04b05f3adfa
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.4.2
@@ -40,7 +40,7 @@ require (
 	github.com/heimdalr/dag v1.2.1
 	github.com/holiman/big v0.0.0-20221017200358-a027dc42d04e
 	github.com/holiman/bloomfilter/v2 v2.0.3
-	github.com/holiman/uint256 v1.2.2-0.20230321075855-87b91420868c
+	github.com/holiman/uint256 v1.2.0
 	github.com/huin/goupnp v1.0.3
 	github.com/imdario/mergo v0.3.11
 	github.com/influxdata/influxdb v1.8.3
@@ -91,6 +91,8 @@ require (
 
 require github.com/gammazero/deque v0.2.1 // indirect
 
+require github.com/golang/protobuf v1.5.2
+
 require (
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
 	github.com/consensys/bavard v0.1.13 // indirect
@@ -118,7 +120,7 @@ require (
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310 // indirect
-	github.com/aws/aws-sdk-go v1.29.15 // indirect
+	github.com/aws/aws-sdk-go v1.42.20 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.0.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.0.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.1.1 // indirect
@@ -131,7 +133,7 @@ require (
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
 	github.com/cbergoon/merkletree v0.2.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.1 // indirect
-	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cosmos/cosmos-sdk v0.37.4
 	github.com/cosmos/go-bip39 v0.0.0-20180618194314-52158e4697b8 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.10.3 // indirect
@@ -147,7 +149,6 @@ require (
 	github.com/go-ole/go-ole v1.2.1 // indirect
 	github.com/go-redis/redis v6.15.7+incompatible // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
-	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
@@ -165,7 +166,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
-	github.com/klauspost/compress v1.15.15 // indirect
+	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
 	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
@@ -209,7 +210,7 @@ require (
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	github.com/zondax/hid v0.9.0 // indirect
 	go.mongodb.org/mongo-driver v1.3.0 // indirect
-	go.opencensus.io v0.22.6 // indirect
+	go.opencensus.io v0.22.5 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.2.0 // indirect
 	go.opentelemetry.io/otel/trace v1.2.0
 	go.opentelemetry.io/proto/otlp v0.10.0 // indirect
