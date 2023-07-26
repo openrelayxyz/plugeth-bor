@@ -256,6 +256,12 @@ func CreateConsensusEngine(stack *node.Node, chainConfig *params.ChainConfig, et
 	config := &ethConfig.Ethash
 
 	// If proof-of-authority is requested, set it up
+	//begin PluGeth code injection
+	if engine := pluginGetEngine(chainConfig, db); engine != nil {
+		log.Info("returning plugin consensus engine")
+		return engine 
+	}
+	//end PluGeth code injection
 	var engine consensus.Engine
 	if chainConfig.Clique != nil {
 		return clique.New(chainConfig.Clique, db)
