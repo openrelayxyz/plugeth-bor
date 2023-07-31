@@ -17,7 +17,6 @@
 package tracers
 
 import (
-	"reflect"
 	"bufio"
 	"bytes"
 	"context"
@@ -1221,9 +1220,7 @@ func (api *API) traceTx(ctx context.Context, message core.Message, txctx *Contex
 		}
 		// begin PluGeth code injection
 		if tr, ok := getPluginTracer(*config.Tracer); ok {
-			log.Error("tracer type", "tr", reflect.TypeOf(tr))
 			tracer = tr(statedb, vmctx)
-			log.Error("tracer type", "tracer", reflect.TypeOf(tracer))
 		} else {
 			if t, err := New(*config.Tracer, txctx); err != nil {
 				return nil, err
