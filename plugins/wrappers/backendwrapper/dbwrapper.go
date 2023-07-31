@@ -11,6 +11,12 @@ type dbWrapper struct {
 	db ethdb.Database
 }
 
+func NewDb(db ethdb.Database) restricted.Database {
+	return &dbWrapper{
+		db: db,
+	}
+}
+
 func (d *dbWrapper) Has(key []byte) (bool, error)             { return d.db.Has(key) }
 func (d *dbWrapper) Get(key []byte) ([]byte, error)           { return d.db.Get(key) }
 func (d *dbWrapper) Put(key []byte, value []byte) error       { return d.db.Put(key, value) }

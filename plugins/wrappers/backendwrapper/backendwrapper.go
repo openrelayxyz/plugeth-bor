@@ -13,8 +13,10 @@ import (
 	gcore "github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
+	gparams "github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/internal/ethapi"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/trie"
 
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -460,4 +462,50 @@ func (b *Backend) ChainConfig() *params.ChainConfig {
 		}
 	}
 	return b.chainConfig
+}
+
+func CloneChainConfig(cf *gparams.ChainConfig) *params.ChainConfig {
+	result := &params.ChainConfig{}
+	nval := reflect.ValueOf(result)
+	ntype := nval.Elem().Type()
+	lval := reflect.ValueOf(cf)
+	for i := 0; i < nval.Elem().NumField(); i++ {
+		field := ntype.Field(i)
+		v := nval.Elem().FieldByName(field.Name)
+		lv := lval.Elem().FieldByName(field.Name)
+		log.Info("Checking value for", "field", field.Name)
+		if lv.Kind() != reflect.Invalid {
+			// If core.ChainConfig doesn't have this field, skip it.
+			if v.Type() == lv.Type() && lv.CanSet() {
+				lv.Set(v)
+			} else {
+				convertAndSet(lv, v)
+			}
+		}
+	}
+	return result
+}
+
+func (b *Backend) GetTrie(h core.Hash) (core.Trie, error) {
+	tr, err := trie.NewSecure(common.Hash(h), trie.NewDatabase(b.b.ChainDb()))
+	if err != nil {
+		return nil, err
+	}
+	return NewWrappedTrie(tr), nil
+}
+
+func (b *Backend) GetAccountTrie(stateRoot core.Hash, account core.Address) (core.Trie, error) {
+	tr, err := b.GetTrie(stateRoot)
+	if err != nil {
+		return nil, err
+	}
+	act, err := tr.GetAccount(account)
+	if err != nil {
+		return nil, err
+	}
+	acTr, err := trie.NewSecure(common.Hash(act.Root), trie.NewDatabase(b.b.ChainDb()))
+	if err != nil {
+		return nil, err
+	}
+	return NewWrappedTrie(acTr), nil
 }

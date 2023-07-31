@@ -17,6 +17,7 @@
 package eth
 
 import (
+	"context"
 	"errors"
 	"math"
 	"math/big"
@@ -69,7 +70,7 @@ type txPool interface {
 
 	// Pending should return pending transactions.
 	// The slice should be modifiable by the caller.
-	Pending(enforceTips bool) map[common.Address]types.Transactions
+	Pending(ctx context.Context, enforceTips bool) map[common.Address]types.Transactions
 
 	// SubscribeNewTxsEvent should return an event subscription of
 	// NewTxsEvent and send events to the given channel.
@@ -92,6 +93,7 @@ type handlerConfig struct {
 
 	PeerRequiredBlocks map[uint64]common.Hash // Hard coded map of required block hashes for sync challenges
 	checker            ethereum.ChainValidator
+	txArrivalWait      time.Duration // Maximum duration to wait for an announced tx before requesting it
 }
 
 type handler struct {
@@ -306,7 +308,7 @@ func newHandler(config *handlerConfig) (*handler, error) {
 		}
 		return p.RequestTxs(hashes)
 	}
-	h.txFetcher = fetcher.NewTxFetcher(h.txpool.Has, h.txpool.AddRemotes, fetchTx)
+	h.txFetcher = fetcher.NewTxFetcher(h.txpool.Has, h.txpool.AddRemotes, fetchTx, config.txArrivalWait)
 	h.chainSync = newChainSyncer(h)
 	return h, nil
 }
