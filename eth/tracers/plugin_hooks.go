@@ -45,7 +45,7 @@ func GetPluginTracer(pl *plugins.PluginLoader, name string) (func(*state.StateDB
 			}
 		}
 	}
-	log.Info("Tracer not found", "name", name, "tracers", len(tracers))
+	log.Warn("PluGeth tracer not found", "name", name, "tracers", len(tracers))
 	return nil, false
 }
 

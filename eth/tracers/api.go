@@ -17,6 +17,7 @@
 package tracers
 
 import (
+	"reflect"
 	"bufio"
 	"bytes"
 	"context"
@@ -1211,17 +1212,6 @@ func (api *API) traceTx(ctx context.Context, message core.Message, txctx *Contex
 	case config == nil:
 		tracer = logger.NewStructLogger(nil)
 	case config.Tracer != nil:
-		// Get the tracer from the plugin loader
-		//begin PluGeth code injection
-		if tr, ok := getPluginTracer(*config.Tracer); ok {
-			//end PluGeth code injection
-			tracer = tr(statedb, vmctx)
-		} else {
-			tracer, err = New(*config.Tracer, txctx)
-			if err != nil {
-				return nil, err
-			}
-		}
 		// Define a meaningful timeout of a single transaction trace
 		timeout := defaultTraceTimeout
 		if config.Timeout != nil {
@@ -1229,19 +1219,27 @@ func (api *API) traceTx(ctx context.Context, message core.Message, txctx *Contex
 				return nil, err
 			}
 		}
-		if t, err := New(*config.Tracer, txctx); err != nil {
-			return nil, err
+		// begin PluGeth code injection
+		if tr, ok := getPluginTracer(*config.Tracer); ok {
+			log.Error("tracer type", "tr", reflect.TypeOf(tr))
+			tracer = tr(statedb, vmctx)
+			log.Error("tracer type", "tracer", reflect.TypeOf(tracer))
 		} else {
-			deadlineCtx, cancel := context.WithTimeout(ctx, timeout)
-			go func() {
-				<-deadlineCtx.Done()
-				if errors.Is(deadlineCtx.Err(), context.DeadlineExceeded) {
-					t.Stop(errors.New("execution timeout"))
-				}
-			}()
-			defer cancel()
-			tracer = t
+			if t, err := New(*config.Tracer, txctx); err != nil {
+				return nil, err
+			} else {
+				deadlineCtx, cancel := context.WithTimeout(ctx, timeout)
+				go func() {
+					<-deadlineCtx.Done()
+					if errors.Is(deadlineCtx.Err(), context.DeadlineExceeded) {
+						t.Stop(errors.New("execution timeout"))
+					}
+				}()
+				defer cancel()
+				tracer = t
+			}
 		}
+		// end PluGeth code injection
 	default:
 		tracer = logger.NewStructLogger(config.Config)
 	}
