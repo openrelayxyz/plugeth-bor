@@ -21,7 +21,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path" // -- PluGeth injection
+	"path/filepath"
 	"os/signal"
 	"sort"
 	"strconv"
@@ -62,6 +62,9 @@ const (
 var (
 	// flags that configure the node
 	nodeFlags = flags.Merge([]cli.Flag{
+		//begin PluGeth code injection
+		utils.PluginsDirFlag,
+		//end PluGeth code injection
 		utils.BorLogsFlag,
 		utils.IdentityFlag,
 		utils.UnlockedAccountFlag,
@@ -355,7 +358,14 @@ func prepare(ctx *cli.Context) {
 // blocking mode, waiting for it to be shut down.
 func geth(ctx *cli.Context) error {
 	//begin PluGeth code injection
-	if err := plugins.Initialize(path.Join(ctx.String(utils.DataDirFlag.Name), "plugins"), ctx); err != nil {
+	var pluginsDir string
+	if ctx.IsSet(utils.PluginsDirFlag.Name) {
+		pluginsDir = ctx.String(utils.PluginsDirFlag.Name)
+	} else {
+		pluginsDir = filepath.Join(ctx.String(utils.DataDirFlag.Name), "plugins")
+	}
+
+	if err := plugins.Initialize(pluginsDir, ctx); err != nil {
 		return err
 	}
 
@@ -369,6 +379,12 @@ func geth(ctx *cli.Context) error {
 	}
 
 	prepare(ctx)
+
+	if !plugins.ParseFlags(ctx.Args().Slice()) {
+		if args := ctx.Args().Slice(); len(args) > 0 {
+			return fmt.Errorf("invalid command: %q", args[0])
+		}
+	}
 
 	stack, backend := makeFullNode(ctx)
 	wrapperBackend := backendwrapper.NewBackend(backend)

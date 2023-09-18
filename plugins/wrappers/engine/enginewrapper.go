@@ -409,10 +409,10 @@ func (ew *engineWrapper) Prepare(chain consensus.ChainHeaderReader, header *type
 	*header = *utilsToGethHeader(uHeader)
 	return nil
 }
-func (ew *engineWrapper) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header) {
+func (ew *engineWrapper) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, withdrawals []*types.Withdrawal) {
 	ew.engine.Finalize(&WrappedHeaderReader{chain, nil}, gethToUtilsHeader(header), wrappers.NewWrappedStateDB(state), gethToUtilsTransactions(txs), gethToUtilsHeaders(uncles), gethToUtilsWithdrawals())
 }
-func (ew *engineWrapper) FinalizeAndAssemble(ctx context.Context, chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
+func (ew *engineWrapper) FinalizeAndAssemble(ctx context.Context, chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt, withdrawals []*types.Withdrawal) (*types.Block, error) {
 	block, err := ew.engine.FinalizeAndAssemble(&WrappedHeaderReader{chain, nil}, gethToUtilsHeader(header), wrappers.NewWrappedStateDB(state), gethToUtilsTransactions(txs), gethToUtilsHeaders(uncles), gethToUtilsReceipts(receipts), gethToUtilsWithdrawals())
 	return utilsToGethBlock(block), err
 }

@@ -1328,34 +1328,27 @@ func (api *API) traceTx(ctx context.Context, message *core.Message, txctx *Conte
 	// Default tracer is the struct logger
 	tracer = logger.NewStructLogger(config.Config)
 	if config.Tracer != nil {
-		tracer, err = DefaultDirectory.New(*config.Tracer, txctx, config.TracerConfig)
-		if err != nil {
-			return nil, err
-		}
-		// begin PluGeth code injection
+		// Get the tracer from the plugin loader
+		//begin PluGeth code injection
 		if tr, ok := getPluginTracer(*config.Tracer); ok {
 			tracer = tr(statedb, vmctx)
 		} else {
-			if t, err := New(*config.Tracer, txctx); err != nil {
+			tracer, err = DefaultDirectory.New(*config.Tracer, txctx, config.TracerConfig)
+			if err != nil {
 				return nil, err
-			} else {
-				deadlineCtx, cancel := context.WithTimeout(ctx, timeout)
-				go func() {
-					<-deadlineCtx.Done()
-					if errors.Is(deadlineCtx.Err(), context.DeadlineExceeded) {
-						t.Stop(errors.New("execution timeout"))
-					}
-				}()
-				defer cancel()
-				tracer = t
 			}
 		}
-		// end PluGeth code injection
-	default:
-		tracer = logger.NewStructLogger(config.Config)
+		// end PluGeth injection
 	}
-	// Run the transaction with tracing enabled.
-	vmenv := vm.NewEVM(vmctx, txContext, statedb, api.backend.ChainConfig(), vm.Config{Debug: true, Tracer: tracer, NoBaseFee: true})
+
+	vmenv := vm.NewEVM(vmctx, txContext, statedb, api.backend.ChainConfig(), vm.Config{Tracer: tracer, NoBaseFee: true})
+
+	// Define a meaningful timeout of a single transaction trace
+	if config.Timeout != nil {
+		if timeout, err = time.ParseDuration(*config.Timeout); err != nil {
+			return nil, err
+		}
+	}
 
 	deadlineCtx, cancel := context.WithTimeout(ctx, timeout)
 

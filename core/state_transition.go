@@ -369,7 +369,7 @@ func (st *StateTransition) TransitionDb(interruptCtx context.Context) (*Executio
 
 	// begin PluGeth injection
 	if v, ok := st.evm.Config.Tracer.(PreTracer); ok {
-		v.CapturePreStart(st.msg.From(),  st.msg.To(), st.data, st.gas, st.msg.Value())
+		v.CapturePreStart(st.msg.From,  st.msg.To, st.msg.Data, st.msg.GasLimit, st.msg.Value)
 		}
 	// end PluGeth injection 
 
