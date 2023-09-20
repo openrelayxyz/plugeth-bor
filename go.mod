@@ -65,9 +65,9 @@ require (
 	github.com/mitchellh/cli v1.1.2
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/olekukonko/tablewriter v0.0.5
+	github.com/openrelayxyz/plugeth-utils v1.2.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/peterh/liner v1.2.0
-	github.com/prometheus/tsdb v0.10.0
 	github.com/rs/cors v1.7.0
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible
@@ -92,7 +92,6 @@ require (
 	golang.org/x/tools v0.7.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce
-	gopkg.in/urfave/cli.v1 v1.20.0
 	gotest.tools v2.2.0+incompatible
 	pgregory.net/rapid v0.4.8
 )
@@ -162,21 +161,13 @@ require (
 	github.com/tklauser/go-sysconf v0.3.5 // indirect
 	github.com/tklauser/numcpus v0.2.2 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
-	github.com/xsleonard/go-merkle v1.1.0
-	go.opentelemetry.io/otel v1.2.0
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.2.0
-	go.opentelemetry.io/otel/sdk v1.2.0
-	go.uber.org/goleak v1.1.12
 	golang.org/x/mod v0.9.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
-	golang.org/x/xerrors v0.0.0-20220517211312-f3a8303e98df // indirect
 	gonum.org/v1/gonum v0.11.0
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gotest.tools v2.2.0+incompatible
-	pgregory.net/rapid v0.4.8
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
@@ -209,17 +200,12 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jmhodges/levigo v1.0.0 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/pelletier/go-toml v1.9.5
 	github.com/posener/complete v1.1.1 // indirect
 	github.com/rakyll/statik v0.1.7 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
@@ -245,18 +231,12 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.65.0 // indirect
-	cloud.google.com/go/pubsub v1.3.1 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible // indirect
 	github.com/RichardKnop/logging v0.0.0-20190827224416-1a693bdd4fae // indirect
 	github.com/RichardKnop/machinery v1.7.4 // indirect
 	github.com/RichardKnop/redsync v1.2.0 // indirect
-	github.com/agext/levenshtein v1.2.1 // indirect
-	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
-	github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310 // indirect
-	github.com/aws/aws-sdk-go v1.34.28 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	github.com/zondax/hid v0.9.0 // indirect
 	go.mongodb.org/mongo-driver v1.3.0 // indirect
