@@ -1603,6 +1603,11 @@ func (bc *BlockChain) writeKnownBlock(block *types.Block) error {
 // writeBlockWithState writes block, metadata and corresponding state data to the
 // database.
 func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.Receipt, logs []*types.Log, state *state.StateDB) ([]*types.Log, error) {
+	//begin PluGeth injection
+	var interval time.Duration
+	_ = pluginSetTrieFlushIntervalClone(interval) // this is being called here to engage a testing scenario
+	//end PluGeth injection
+
 	// Calculate the total difficulty of the block
 	ptd := bc.GetTd(block.ParentHash(), block.NumberU64()-1)
 	if ptd == nil {
@@ -1689,11 +1694,13 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	}
 	// Find the next state trie we need to commit
 	chosen := current - bc.cacheConfig.TriesInMemory
-	// begin PluGeth code injection
-			bc.cacheConfig.TrieTimeLimit = pluginSetTrieFlushIntervalClone(bc.cacheConfig.TrieTimeLimit)
-			// end PluGeth code injection	
 	flushInterval := time.Duration(bc.flushInterval.Load())
 	// If we exceeded time allowance, flush an entire trie to disk
+
+	// begin PluGeth code injection
+	flushInterval = pluginSetTrieFlushIntervalClone(flushInterval)
+	// end PluGeth code injection
+
 	if bc.gcproc > flushInterval {
 		// If the header is missing (canonical chain behind), we're reorging a low
 		// diff sidechain. Suspend committing until this operation is completed.
