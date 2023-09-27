@@ -11,10 +11,7 @@
     "petersburgBlock": 0,
     "istanbulBlock": 0,
     "berlinBlock" : 0,
-    "londonBlock": 0,
-    "mergeNetsplitBlock": 0,
-    "jaipurBlock": 0,
-    "delhiBlock": 0,
+    "bor": {},
     "clique": {
       "period": 5,
       "epoch": 30000
