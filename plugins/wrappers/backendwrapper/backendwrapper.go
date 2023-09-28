@@ -11,7 +11,9 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	gcore "github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/event"
 	gparams "github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/internal/ethapi"
@@ -176,9 +178,9 @@ func (b *Backend) BloomStatus() (uint64, uint64) {
 	return b.b.BloomStatus()
 }
 
-// the following method is a polygon idiosyncratic implementiation
-func (b *Backend) GetLogs(ctx context.Context, blockHash core.Hash) ([][]byte, error) { 
-	logs, err := b.b.GetLogs(ctx, common.Hash(blockHash))
+func (b *Backend) GetLogs(ctx context.Context, blockHash core.Hash) ([][]byte, error) {
+	header, _ := b.b.HeaderByHash(ctx, common.Hash(blockHash))
+	logs, err := b.b.GetLogs(ctx, common.Hash(blockHash), uint64(header.Number.Uint64()))
 	if err != nil {
 		return nil, err
 	}
@@ -487,7 +489,7 @@ func CloneChainConfig(cf *gparams.ChainConfig) *params.ChainConfig {
 }
 
 func (b *Backend) GetTrie(h core.Hash) (core.Trie, error) {
-	tr, err := trie.NewSecure(common.Hash(h), trie.NewDatabase(b.b.ChainDb()))
+	tr, err := trie.NewStateTrie(trie.TrieID(common.Hash(h)), trie.NewDatabase(b.b.ChainDb()))
 	if err != nil {
 		return nil, err
 	}
@@ -503,9 +505,13 @@ func (b *Backend) GetAccountTrie(stateRoot core.Hash, account core.Address) (cor
 	if err != nil {
 		return nil, err
 	}
-	acTr, err := trie.NewSecure(common.Hash(act.Root), trie.NewDatabase(b.b.ChainDb()))
+	acTr, err := trie.NewStateTrie(trie.StorageTrieID(common.Hash(stateRoot), crypto.Keccak256Hash(account[:]), common.Hash(act.Root)), trie.NewDatabase(b.b.ChainDb()))
 	if err != nil {
 		return nil, err
 	}
 	return NewWrappedTrie(acTr), nil
+}
+
+func (b *Backend) GetContractCode(h core.Hash) ([]byte, error) {
+	return state.NewDatabase(b.b.ChainDb()).ContractCode(common.Hash{}, common.Hash(h))
 }

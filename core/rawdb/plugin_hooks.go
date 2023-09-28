@@ -91,7 +91,7 @@ func PluginCommitUpdate(pl *plugins.PluginLoader, num uint64) {
 				receipts []byte
 				td []byte
 			)
-			if hashi, ok := update[freezerHashTable]; ok {
+			if hashi, ok := update[ChainFreezerHashTable]; ok {
 				switch v := hashi.(type) {
 				case []byte:
 					hash = v
@@ -99,7 +99,7 @@ func PluginCommitUpdate(pl *plugins.PluginLoader, num uint64) {
 					hash, _ = rlp.EncodeToBytes(v)
 				}
 			}
-			if headeri, ok := update[freezerHeaderTable]; ok {
+			if headeri, ok := update[ChainFreezerHeaderTable]; ok {
 				switch v := headeri.(type) {
 				case []byte:
 					header = v
@@ -107,7 +107,7 @@ func PluginCommitUpdate(pl *plugins.PluginLoader, num uint64) {
 					header, _ = rlp.EncodeToBytes(v)
 				}
 			}
-			if bodyi, ok := update[freezerBodiesTable]; ok {
+			if bodyi, ok := update[ChainFreezerBodiesTable]; ok {
 				switch v := bodyi.(type) {
 				case []byte:
 					body = v
@@ -115,7 +115,7 @@ func PluginCommitUpdate(pl *plugins.PluginLoader, num uint64) {
 					body, _ = rlp.EncodeToBytes(v)
 				}
 			}
-			if receiptsi, ok := update[freezerReceiptTable]; ok {
+			if receiptsi, ok := update[ChainFreezerReceiptTable]; ok {
 				switch v := receiptsi.(type) {
 				case []byte:
 					receipts = v
@@ -123,7 +123,7 @@ func PluginCommitUpdate(pl *plugins.PluginLoader, num uint64) {
 					receipts, _ = rlp.EncodeToBytes(v)
 				}
 			}
-			if tdi, ok := update[freezerDifficultyTable]; ok {
+			if tdi, ok := update[ChainFreezerDifficultyTable]; ok {
 				switch v := tdi.(type) {
 				case []byte:
 					td = v

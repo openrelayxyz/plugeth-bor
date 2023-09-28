@@ -99,6 +99,12 @@ func BlockChain() {
 							delete(plugins, "LiveCaptureStart")
 						case f("LiveCaptureState"):
 							delete(plugins, "LiveCaptureState")
+						case f("LiveCaptureEnd"):
+							delete(plugins, "LiveCaptureEnd")
+						case f("PreTrieCommit"):
+							delete(plugins, "PreTrieCommit")
+						case f("PostTrieCommit"):
+							delete(plugins, "PostTrieCommit")
 						// These methods are not covered by tests at this time
 						// case f("LiveCaptureFault"):
 						// 	delete(plugins, "LiveCaptureFault")
@@ -108,12 +114,6 @@ func BlockChain() {
 						// 	delete(plugins, "LiveCaptureExit")
 						// case f("LiveTracerResult"):
 						// 	delete(plugins, "LiveTracerResult")
-						case f("LiveCaptureEnd"):
-							delete(plugins, "LiveCaptureEnd")
-						case f("PreTrieCommit"):
-							delete(plugins, "PreTrieCommit")
-						case f("PostTrieCommit"):
-							delete(plugins, "PostTrieCommit")
 				}
 			}
 		}
@@ -189,8 +189,8 @@ func txFactory() {
 		"from": coinBase,
 	}
 
-	for i := 0; i < 128; i ++ {
-		time.Sleep(2 * time.Second)
+	for i := 0; i < 10; i ++ {
+		time.Sleep(4 * time.Second)
 		err = client.Call(&t3, "eth_sendTransaction", genericArg)
 		if err != nil {
 			log.Error("looped transaction failed on index", "i", i, "err", err)

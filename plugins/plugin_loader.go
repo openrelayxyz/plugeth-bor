@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/openrelayxyz/plugeth-utils/core"
-	"gopkg.in/urfave/cli.v1"
+	"github.com/urfave/cli/v2"
 )
 
 type Subcommand func(core.Context, []string) error
@@ -131,7 +131,7 @@ func (pl *PluginLoader) Initialize(ctx core.Context) {
 }
 
 func (pl *PluginLoader) RunSubcommand(ctx *cli.Context) (bool, error) {
-	args := ctx.Args() // this line is polygon specific implementaion
+	args := ctx.Args().Slice()
 	if len(args) == 0 {
 		return false, fmt.Errorf("no subcommand arguments")
 	}

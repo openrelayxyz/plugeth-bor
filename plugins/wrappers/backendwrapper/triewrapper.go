@@ -1,12 +1,9 @@
 package backendwrapper
 
 import (
-	// "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rlp"
 
 	"github.com/openrelayxyz/plugeth-utils/core"
 )
@@ -20,20 +17,20 @@ func NewWrappedTrie(t state.Trie) core.Trie {
 }
 
 func (t *WrappedTrie) GetKey(b []byte) []byte {
-	key, _ := t.t.TryGet(b)
-	return key
+	return t.t.GetKey(b)
 }
 
 func (t *WrappedTrie) GetAccount(address core.Address) (*core.StateAccount, error) {
-	rawAcct, err := t.t.TryGet(crypto.Keccak256Hash(address[:]).Bytes())
+	act, err := t.t.GetAccount(common.Address(address))
 	if err != nil {
 		return nil, err
 	}
-	var stateAcct core.StateAccount
-	if err := rlp.DecodeBytes(rawAcct, &stateAcct); err != nil {
-		return nil, err
-	}
-	return &stateAcct, nil
+	return &core.StateAccount{
+		Nonce: act.Nonce,
+		Balance: act.Balance,
+		Root: core.Hash(act.Root),
+		CodeHash: act.CodeHash,
+	}, nil
 }
 
 func (t *WrappedTrie) Hash() core.Hash {
@@ -94,12 +91,11 @@ func (n WrappedNodeIterator) LeafProof() [][]byte {
 }
 
 func (n WrappedNodeIterator) AddResolver(c core.NodeResolver) {
-	// n.n.AddResolver(WrappedNodeResolver(c))
-	log.Error("Not implemented")
+	n.n.AddResolver(WrappedNodeResolver(c))
 }
 
-// func WrappedNodeResolver(fn core.NodeResolver) trie.NodeResolver {
-// 	return func(owner common.Hash, path []byte, hash common.Hash) []byte {
-// 		return fn(core.Hash(owner), path, core.Hash(hash) )
-// 	}
-// }
+func WrappedNodeResolver(fn core.NodeResolver) trie.NodeResolver {
+	return func(owner common.Hash, path []byte, hash common.Hash) []byte {
+		return fn(core.Hash(owner), path, core.Hash(hash) )
+	}
+}

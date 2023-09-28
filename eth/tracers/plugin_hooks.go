@@ -1,6 +1,7 @@
 package tracers
 
 import (
+	"math/big"
 	"reflect"
 
 	"github.com/ethereum/go-ethereum/core/state"
@@ -37,7 +38,7 @@ func GetPluginTracer(pl *plugins.PluginLoader, name string) (func(*state.StateDB
 						Coinbase:    core.Address(vmctx.Coinbase),
 						GasLimit:    vmctx.GasLimit,
 						BlockNumber: vmctx.BlockNumber,
-						Time:        vmctx.Time,
+						Time:        new(big.Int).SetInt64(int64(vmctx.Time)),
 						Difficulty:  vmctx.Difficulty,
 						BaseFee:     vmctx.BaseFee,
 					}))
