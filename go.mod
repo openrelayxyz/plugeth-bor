@@ -168,8 +168,6 @@ require (
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gotest.tools v2.2.0+incompatible
-	pgregory.net/rapid v0.4.8
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
