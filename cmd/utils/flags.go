@@ -1036,6 +1036,12 @@ Please note that --` + MetricsHTTPFlag.Name + ` must be set to start the server.
 		Value:    metrics.DefaultConfig.InfluxDBOrganization,
 		Category: flags.MetricsCategory,
 	}
+
+	ParallelFlag = &cli.BoolFlag{
+		Name:     "parallel",
+		Usage:    "Enables parallel EVM processing",
+		Category: flags.PerfCategory,
+	}
 )
 
 var (
@@ -2017,6 +2023,15 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *ethconfig.Config) {
 			cfg.EthDiscoveryURLs = SplitAndTrim(urls)
 		}
 	}
+
+	//begin plugeth injection
+	if ctx.IsSet(ParallelFlag.Name) {
+		cfg.ParallelEVM = core.ParallelEVMConfig{
+			Enable:               true,
+			SpeculativeProcesses: 8,
+		}
+	}
+	//end plugeth injection
 
 	// Override any default configs for hard coded networks.
 	switch {

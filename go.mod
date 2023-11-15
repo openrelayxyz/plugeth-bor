@@ -1,6 +1,6 @@
 module github.com/ethereum/go-ethereum
 
-go 1.20
+go 1.21
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v0.3.0
@@ -65,7 +65,7 @@ require (
 	github.com/mitchellh/cli v1.1.2
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/openrelayxyz/plugeth-utils v1.3.0
+	github.com/openrelayxyz/plugeth-utils v1.4.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/peterh/liner v1.2.0
 	github.com/rs/cors v1.7.0

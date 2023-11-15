@@ -76,7 +76,6 @@ var (
 		utils.NoUSBFlag,
 		utils.USBFlag,
 		utils.SmartCardDaemonPathFlag,
-		// TODO marcello double check
 		utils.OverrideShanghai,
 		utils.EnablePersonal,
 		utils.EthashCacheDirFlag,
@@ -165,6 +164,9 @@ var (
 		utils.GpoIgnoreGasPriceFlag,
 		utils.MinerNotifyFullFlag,
 		configFileFlag,
+		// begin plugeth injection
+		utils.ParallelFlag,
+		//end plugeth injection
 	}, utils.NetworkFlags, utils.DatabasePathFlags)
 
 	rpcFlags = []cli.Flag{
