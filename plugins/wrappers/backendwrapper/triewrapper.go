@@ -1,6 +1,7 @@
 package backendwrapper
 
 import (
+	"errors"
 	"github.com/ethereum/go-ethereum/common"
 	// "github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/trie"
@@ -36,6 +37,9 @@ func (t *WrappedTrie) GetAccountByHash(h core.Hash) (*core.StateAccount, error) 
 	act, err := t.t.GetAccountByHash(common.Hash(h))
 	if err != nil {
 		return nil, err
+	}
+	if act == nil {
+		return nil, errors.New("got nil account by hash")
 	}
 	return &core.StateAccount{
 		Nonce: act.Nonce,
