@@ -2,17 +2,17 @@ package backendwrapper
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
+	// "github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/trie"
 
 	"github.com/openrelayxyz/plugeth-utils/core"
 )
 
 type WrappedTrie struct {
-	t state.Trie
+	t *trie.StateTrie
 }
 
-func NewWrappedTrie(t state.Trie) core.Trie {
+func NewWrappedTrie(t *trie.StateTrie) core.Trie {
 	return &WrappedTrie{t}
 }
 
@@ -22,6 +22,18 @@ func (t *WrappedTrie) GetKey(b []byte) []byte {
 
 func (t *WrappedTrie) GetAccount(address core.Address) (*core.StateAccount, error) {
 	act, err := t.t.GetAccount(common.Address(address))
+	if err != nil {
+		return nil, err
+	}
+	return &core.StateAccount{
+		Nonce: act.Nonce,
+		Balance: act.Balance,
+		Root: core.Hash(act.Root),
+		CodeHash: act.CodeHash,
+	}, nil
+}
+func (t *WrappedTrie) GetAccountByHash(h core.Hash) (*core.StateAccount, error) {
+	act, err := t.t.GetAccountByHash(common.Hash(h))
 	if err != nil {
 		return nil, err
 	}
