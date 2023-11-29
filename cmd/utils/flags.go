@@ -79,6 +79,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/ethereum/go-ethereum/trie"
+	"github.com/ethereum/go-ethereum/internal/cli/server/chains"
 )
 
 // These are all the command line flags we support.
@@ -2035,6 +2036,14 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *ethconfig.Config) {
 
 	// Override any default configs for hard coded networks.
 	switch {
+	//begin plugeth injection
+	case ctx.Bool(BorMainnetFlag.Name):
+		chain, err := chains.GetChain("mainnet")
+		if err != nil {
+			panic(err.Error())
+		}
+		cfg.Genesis = chain.Genesis
+	//end plugeth injection
 	case ctx.Bool(MainnetFlag.Name):
 		if !ctx.IsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 1
