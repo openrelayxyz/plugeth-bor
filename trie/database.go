@@ -18,17 +18,8 @@ package trie
 
 import (
 	"errors"
-	"fmt"
-	"io"
-	"reflect"
-	"runtime"
-	"sync"
-	"time"
 
-	"github.com/VictoriaMetrics/fastcache"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/trie/triedb/hashdb"
 	"github.com/ethereum/go-ethereum/trie/triedb/pathdb"
@@ -218,71 +209,13 @@ func (db *Database) Cap(limit common.StorageSize) error {
 // is used to add reference between internal trie node and external node(e.g. storage
 // trie root), all internal trie nodes are referenced together by database itself.
 //
-// Note, this method is a non-synchronized mutator. It is unsafe to call this
-// concurrently with other mutators.
-func (db *Database) Commit(node common.Hash, report bool) error {
-	// Create a database batch to flush persistent data out. It is important that
-	// outside code doesn't see an inconsistent state (referenced data removed from
-	// memory cache during commit but not yet in persistent storage). This is ensured
-	// by only uncaching existing data when the database write finalizes.
-
-	// begin PluGeth injection
-	pluginPreTrieCommit(node)
-	// end PluGeth injection
-
-	start := time.Now()
-	batch := db.diskdb.NewBatch()
-
-	// Move all of the accumulated preimages into a write batch
-	if db.preimages != nil {
-		if err := db.preimages.commit(true); err != nil {
-			return err
-		}
+// It's only supported by hash-based database and will return an error for others.
+func (db *Database) Reference(root common.Hash, parent common.Hash) error {
+	hdb, ok := db.backend.(*hashdb.Database)
+	if !ok {
+		return errors.New("not supported")
 	}
-	// Move the trie itself into the batch, flushing if enough data is accumulated
-	nodes, storage := len(db.dirties), db.dirtiesSize
-
-	uncacher := &cleaner{db}
-	if err := db.commit(node, batch, uncacher); err != nil {
-		log.Error("Failed to commit trie from trie database", "err", err)
-		return err
-	}
-	// Trie mostly committed to disk, flush any batch leftovers
-	if err := batch.Write(); err != nil {
-		log.Error("Failed to write trie to disk", "err", err)
-		return err
-	}
-	// Uncache any leftovers in the last batch
-	db.lock.Lock()
-	defer db.lock.Unlock()
-
-	if err := batch.Replay(uncacher); err != nil {
-		return err
-	}
-
-	batch.Reset()
-
-	// Reset the storage counters and bumped metrics
-	memcacheCommitTimeTimer.Update(time.Since(start))
-	memcacheCommitSizeMeter.Mark(int64(storage - db.dirtiesSize))
-	memcacheCommitNodesMeter.Mark(int64(nodes - len(db.dirties)))
-
-	logger := log.Info
-	if !report {
-		logger = log.Debug
-	}
-
-	logger("Persisted trie from memory database", "nodes", nodes-len(db.dirties)+int(db.flushnodes), "size", storage-db.dirtiesSize+db.flushsize, "time", time.Since(start)+db.flushtime,
-		"gcnodes", db.gcnodes, "gcsize", db.gcsize, "gctime", db.gctime, "livenodes", len(db.dirties), "livesize", db.dirtiesSize)
-
-	// Reset the garbage collection statistics
-	db.gcnodes, db.gcsize, db.gctime = 0, 0, 0
-	db.flushnodes, db.flushsize, db.flushtime = 0, 0, 0
-
-	// begin PluGeth injection
-	pluginPostTrieCommit(node)
-	// end PluGeth injection
-
+	hdb.Reference(root, parent)
 	return nil
 }
 
