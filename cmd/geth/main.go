@@ -144,8 +144,8 @@ var (
 		utils.DNSDiscoveryFlag,
 		utils.DeveloperFlag,
 		utils.DeveloperGasLimitFlag,
-		utils.SepoliaFlag,
-		utils.GoerliFlag,
+		// utils.SepoliaFlag,
+		// utils.GoerliFlag,
 		utils.MumbaiFlag,
 		utils.BorMainnetFlag,
 		utils.DeveloperPeriodFlag,
@@ -289,11 +289,11 @@ func prepare(ctx *cli.Context) {
 
 	// If we're running a known preset, log it for convenience.
 	switch {
-	case ctx.IsSet(utils.GoerliFlag.Name):
-		log.Info("Starting Geth on Görli testnet...")
+	// case ctx.IsSet(utils.GoerliFlag.Name):
+	// 	log.Info("Starting Geth on Görli testnet...")
 
-	case ctx.IsSet(utils.SepoliaFlag.Name):
-		log.Info("Starting Geth on Sepolia testnet...")
+	// case ctx.IsSet(utils.SepoliaFlag.Name):
+	// 	log.Info("Starting Geth on Sepolia testnet...")
 
 	case ctx.IsSet(utils.MumbaiFlag.Name):
 		log.Info("Starting Bor on Mumbai testnet...")
@@ -325,9 +325,9 @@ func prepare(ctx *cli.Context) {
 	// If we're a full node on mainnet without --cache specified, bump default cache allowance
 	if ctx.String(utils.SyncModeFlag.Name) != light && !ctx.IsSet(utils.CacheFlag.Name) && !ctx.IsSet(utils.NetworkIdFlag.Name) {
 		// Make sure we're not on any supported preconfigured testnet either
-		if !ctx.IsSet(utils.SepoliaFlag.Name) &&
-			!ctx.IsSet(utils.GoerliFlag.Name) &&
-			!ctx.IsSet(utils.MumbaiFlag.Name) &&
+		// if !ctx.IsSet(utils.SepoliaFlag.Name) &&
+		// 	!ctx.IsSet(utils.GoerliFlag.Name) &&
+		if	!ctx.IsSet(utils.MumbaiFlag.Name) &&
 			!ctx.IsSet(utils.DeveloperFlag.Name) {
 			// Nope, we're really on mainnet. Bump that cache up!
 			log.Info("Bumping default cache on mainnet", "provided", ctx.Int(utils.CacheFlag.Name), "updated", 4096)

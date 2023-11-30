@@ -152,16 +152,16 @@ var (
 		Usage:    "Ethereum mainnet",
 		Category: flags.EthCategory,
 	}
-	GoerliFlag = &cli.BoolFlag{
-		Name:     "goerli",
-		Usage:    "Görli network: pre-configured proof-of-authority test network",
-		Category: flags.EthCategory,
-	}
-	SepoliaFlag = &cli.BoolFlag{
-		Name:     "sepolia",
-		Usage:    "Sepolia network: pre-configured proof-of-work test network",
-		Category: flags.EthCategory,
-	}
+	// GoerliFlag = &cli.BoolFlag{
+	// 	Name:     "goerli",
+	// 	Usage:    "Görli network: pre-configured proof-of-authority test network",
+	// 	Category: flags.EthCategory,
+	// }
+	// SepoliaFlag = &cli.BoolFlag{
+	// 	Name:     "sepolia",
+	// 	Usage:    "Sepolia network: pre-configured proof-of-work test network",
+	// 	Category: flags.EthCategory,
+	// }
 	MumbaiFlag = &cli.BoolFlag{
 		Name:  "bor-mumbai",
 		Usage: "Mumbai network: pre-configured proof-of-stake test network",
@@ -990,8 +990,8 @@ Please note that --` + MetricsHTTPFlag.Name + ` must be set to start the server.
 var (
 	// TestnetFlags is the flag group of all built-in supported testnets.
 	TestnetFlags = []cli.Flag{
-		GoerliFlag,
-		SepoliaFlag,
+	// 	GoerliFlag,
+	// 	SepoliaFlag,
 	}
 	// NetworkFlags is the flag group of all built-in supported networks.
 	NetworkFlags = append([]cli.Flag{MainnetFlag}, TestnetFlags...)
@@ -1016,13 +1016,13 @@ func init() {
 // then a subdirectory of the specified datadir will be used.
 func MakeDataDir(ctx *cli.Context) string {
 	if path := ctx.String(DataDirFlag.Name); path != "" {
-		if ctx.Bool(GoerliFlag.Name) {
-			return filepath.Join(path, "goerli")
-		}
+		// if ctx.Bool(GoerliFlag.Name) {
+		// 	return filepath.Join(path, "goerli")
+		// }
 
-		if ctx.Bool(SepoliaFlag.Name) {
-			return filepath.Join(path, "sepolia")
-		}
+		// if ctx.Bool(SepoliaFlag.Name) {
+		// 	return filepath.Join(path, "sepolia")
+		// }
 
 		return path
 	}
@@ -1076,10 +1076,10 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 	switch {
 	case ctx.IsSet(BootnodesFlag.Name):
 		urls = SplitAndTrim(ctx.String(BootnodesFlag.Name))
-	case ctx.Bool(SepoliaFlag.Name):
-		urls = params.SepoliaBootnodes
-	case ctx.Bool(GoerliFlag.Name):
-		urls = params.GoerliBootnodes
+	// case ctx.Bool(SepoliaFlag.Name):
+	// 	urls = params.SepoliaBootnodes
+	// case ctx.Bool(GoerliFlag.Name):
+	// 	urls = params.GoerliBootnodes
 	}
 
 	// don't apply defaults if BootstrapNodes is already set
@@ -1569,10 +1569,10 @@ func SetDataDir(ctx *cli.Context, cfg *node.Config) {
 		cfg.DataDir = ctx.String(DataDirFlag.Name)
 	case ctx.Bool(DeveloperFlag.Name):
 		cfg.DataDir = "" // unless explicitly requested, use memory databases
-	case ctx.Bool(GoerliFlag.Name) && cfg.DataDir == node.DefaultDataDir():
-		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "goerli")
-	case ctx.Bool(SepoliaFlag.Name) && cfg.DataDir == node.DefaultDataDir():
-		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "sepolia")
+	// case ctx.Bool(GoerliFlag.Name) && cfg.DataDir == node.DefaultDataDir():
+	// 	cfg.DataDir = filepath.Join(node.DefaultDataDir(), "goerli")
+	// case ctx.Bool(SepoliaFlag.Name) && cfg.DataDir == node.DefaultDataDir():
+	// 	cfg.DataDir = filepath.Join(node.DefaultDataDir(), "sepolia")
 	}
 }
 
@@ -1755,7 +1755,8 @@ func CheckExclusive(ctx *cli.Context, args ...interface{}) {
 // SetEthConfig applies eth-related command line flags to the config.
 func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *ethconfig.Config) {
 	// Avoid conflicting network flags
-	CheckExclusive(ctx, MainnetFlag, DeveloperFlag, GoerliFlag, SepoliaFlag)
+	// CheckExclusive(ctx, MainnetFlag, DeveloperFlag, GoerliFlag, SepoliaFlag)
+	CheckExclusive(ctx, MainnetFlag, DeveloperFlag)
 	CheckExclusive(ctx, LightServeFlag, SyncModeFlag, "light")
 	CheckExclusive(ctx, DeveloperFlag, ExternalSignerFlag) // Can't use both ephemeral unlocked and external signer
 
@@ -1929,17 +1930,17 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *ethconfig.Config) {
 
 		cfg.Genesis = core.DefaultGenesisBlock()
 		SetDNSDiscoveryDefaults(cfg, params.MainnetGenesisHash)
-	case ctx.Bool(SepoliaFlag.Name):
-		if !ctx.IsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 11155111
-		}
+	// case ctx.Bool(SepoliaFlag.Name):
+	// 	if !ctx.IsSet(NetworkIdFlag.Name) {
+	// 		cfg.NetworkId = 11155111
+	// 	}
 
-		cfg.Genesis = core.DefaultSepoliaGenesisBlock()
-		SetDNSDiscoveryDefaults(cfg, params.SepoliaGenesisHash)
-	case ctx.Bool(GoerliFlag.Name):
-		if !ctx.IsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 5
-		}
+	// 	cfg.Genesis = core.DefaultSepoliaGenesisBlock()
+	// 	SetDNSDiscoveryDefaults(cfg, params.SepoliaGenesisHash)
+	// case ctx.Bool(GoerliFlag.Name):
+	// 	if !ctx.IsSet(NetworkIdFlag.Name) {
+	// 		cfg.NetworkId = 5
+	// 	}
 
 		cfg.Genesis = core.DefaultGoerliGenesisBlock()
 		SetDNSDiscoveryDefaults(cfg, params.GoerliGenesisHash)
@@ -2305,10 +2306,10 @@ func MakeGenesis(ctx *cli.Context) *core.Genesis {
 	switch {
 	case ctx.Bool(MainnetFlag.Name):
 		genesis = core.DefaultGenesisBlock()
-	case ctx.Bool(SepoliaFlag.Name):
-		genesis = core.DefaultSepoliaGenesisBlock()
-	case ctx.Bool(GoerliFlag.Name):
-		genesis = core.DefaultGoerliGenesisBlock()
+	// case ctx.Bool(SepoliaFlag.Name):
+	// 	genesis = core.DefaultSepoliaGenesisBlock()
+	// case ctx.Bool(GoerliFlag.Name):
+	// 	genesis = core.DefaultGoerliGenesisBlock()
 	case ctx.Bool(DeveloperFlag.Name):
 		Fatalf("Developer chains are ephemeral")
 	}
