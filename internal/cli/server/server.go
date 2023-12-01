@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"path/filepath"
+
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"go.opentelemetry.io/otel"
@@ -44,6 +46,11 @@ import (
 	// Force-load the tracer engines to trigger registration
 	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
 	_ "github.com/ethereum/go-ethereum/eth/tracers/native"
+
+	"github.com/ethereum/go-ethereum/plugins"
+	"github.com/ethereum/go-ethereum/plugins/wrappers/backendwrapper"
+	// "github.com/openrelayxyz/plugeth-utils/core"
+	// "github.com/urfave/cli/v2"
 )
 
 type Server struct {
@@ -108,6 +115,15 @@ func VerbosityStringToInt(loglevel string) int {
 
 //nolint:gocognit
 func NewServer(config *Config, opts ...serverOption) (*Server, error) {
+
+	// begin PluGeth injection
+	pluginsDir := filepath.Join(config.DataDir, "plugins")
+	if err := plugins.Initialize(pluginsDir, &DummyContext{}); err != nil {
+		return nil,  err
+	}
+	plugeth_args()
+	//end PluGeth injection
+
 	// start pprof
 	if config.Pprof.Enabled {
 		pprof.SetMemProfileRate(config.Pprof.MemProfileRate)
@@ -253,6 +269,16 @@ func NewServer(config *Config, opts ...serverOption) (*Server, error) {
 
 	filterSystem := utils.RegisterFilterAPI(stack, srv.backend.APIBackend, ethCfg)
 
+	// begin PluGeth injection
+
+	wrapperBackend := backendwrapper.NewBackend(srv.backend.APIBackend)
+
+	pluginsInitializeNode(stack, wrapperBackend)
+
+	stack.RegisterAPIs(pluginGetAPIs(stack, wrapperBackend))
+	
+	// end PluGeth injection
+
 	// debug tracing is enabled by default
 	stack.RegisterAPIs(tracers.APIs(srv.backend.APIBackend))
 	srv.tracerAPI = tracers.NewAPI(srv.backend.APIBackend)
@@ -294,6 +320,11 @@ func NewServer(config *Config, opts ...serverOption) (*Server, error) {
 }
 
 func (s *Server) Stop() {
+
+	// begin PluGeth injection
+	defer pluginsOnShutdown()
+	//end PluGeth injection
+
 	if s.node != nil {
 		s.node.Close()
 	}
