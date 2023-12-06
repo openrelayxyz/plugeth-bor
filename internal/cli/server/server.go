@@ -49,8 +49,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/plugins"
 	"github.com/ethereum/go-ethereum/plugins/wrappers/backendwrapper"
-	// "github.com/openrelayxyz/plugeth-utils/core"
-	// "github.com/urfave/cli/v2"
 )
 
 type Server struct {
@@ -121,7 +119,7 @@ func NewServer(config *Config, opts ...serverOption) (*Server, error) {
 	if err := plugins.Initialize(pluginsDir, &DummyContext{}); err != nil {
 		return nil,  err
 	}
-	plugeth_args()
+	plugethArgs()
 	//end PluGeth injection
 
 	// start pprof
@@ -315,6 +313,10 @@ func NewServer(config *Config, opts ...serverOption) (*Server, error) {
 	if err := srv.node.Start(); err != nil {
 		return nil, err
 	}
+
+	// begin PluGeth injection
+	pluginBlockChain()
+	// end PluGeth injection
 
 	return srv, nil
 }
