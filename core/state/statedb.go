@@ -1523,7 +1523,7 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (common.Hash, error) {
 		// Only update if there's a state transition (skip empty Clique blocks)
 		if parent := s.snap.Root(); parent != root {
 			//begin PluGeth code injection
-			pluginStateUpdate(root, parent, s.convertAccountSet(s.stateObjectsDestruct), s.snapAccounts, s.snapStorage, codeUpdates)
+			pluginStateUpdate(root, parent, s.snap, s.trie, s.convertAccountSet(s.stateObjectsDestruct), s.snapAccounts, s.snapStorage, codeUpdates)
 			if _, ok := s.snap.(*pluginSnapshot); !ok && s.snaps != nil { // This if statement (but not its content) was added by PluGeth
 			//end PluGeth injection
 				if err := s.snaps.Update(root, parent, s.convertAccountSet(s.stateObjectsDestruct), s.snapAccounts, s.snapStorage); err != nil {
