@@ -152,9 +152,7 @@ func prune(snaptree *snapshot.Tree, root common.Hash, maindb ethdb.Database, sta
 			if _, exist := middleStateRoots[common.BytesToHash(checkKey)]; exist {
 				log.Debug("Forcibly delete the middle state roots", "hash", common.BytesToHash(checkKey))
 			} else {
-				if ok, err := stateBloom.Contain(checkKey); err != nil {
-					return err
-				} else if ok {
+				if stateBloom.Contain(checkKey) {
 					continue
 				}
 			}
@@ -467,7 +465,10 @@ func extractGenesis(db ethdb.Database, stateBloom *stateBloom) error {
 		return err
 	}
 
-	accIter := t.NodeIterator(nil)
+	accIter, err := t.NodeIterator(nil)
+	if err != nil {
+		return err
+	}
 	for accIter.Next(true) {
 		hash := accIter.Hash()
 
@@ -491,7 +492,10 @@ func extractGenesis(db ethdb.Database, stateBloom *stateBloom) error {
 					return err
 				}
 
-				storageIter := storageTrie.NodeIterator(nil)
+				storageIter, err := storageTrie.NodeIterator(nil)
+				if err != nil {
+					return err
+				}
 				for storageIter.Next(true) {
 					hash := storageIter.Hash()
 					if hash != (common.Hash{}) {
@@ -552,7 +556,7 @@ const warningLog = `
 
 WARNING!
 
-The clean trie cache is not found. Please delete it by yourself after the 
+The clean trie cache is not found. Please delete it by yourself after the
 pruning. Remember don't start the Geth without deleting the clean trie cache
 otherwise the entire database may be damaged!
 
