@@ -51,6 +51,10 @@ func BlockChain() {
 					var ok bool
 					f := func(key string) bool {_, ok = m[key]; return ok}
 					switch {
+						case f("InitializeNode"):
+							delete(plugins, "InitializeNode")
+						case f("CreateEngine"):
+						delete(plugins, "CreateEngine")
 						case f("OnShutdown"):
 							delete(plugins, "OnShutdown")
 						case f("StateUpdate"):
@@ -119,6 +123,7 @@ func BlockChain() {
 		}
 	}()
 	
+	pseudoCreateEngine()
 	txFactory()
 	txTracer()
 }

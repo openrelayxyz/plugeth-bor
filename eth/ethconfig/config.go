@@ -208,6 +208,12 @@ type Config struct {
 
 // CreateConsensusEngine creates a consensus engine for the given chain configuration.
 func CreateConsensusEngine(chainConfig *params.ChainConfig, ethConfig *Config, db ethdb.Database, blockchainAPI *ethapi.BlockChainAPI) (consensus.Engine, error) {
+	//begin PluGeth code injection
+	if engine := pluginGetEngine(chainConfig, db); engine != nil {
+		log.Info("returning plugin consensus engine")
+		return engine, nil
+	}
+	//end PluGeth code injection
 	// nolint:nestif
 	if chainConfig.Clique != nil {
 		return beacon.New(clique.New(chainConfig.Clique, db)), nil

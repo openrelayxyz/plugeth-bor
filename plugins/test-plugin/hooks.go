@@ -6,6 +6,7 @@ import (
 	"sync"
 	
 	"github.com/openrelayxyz/plugeth-utils/core"
+	"github.com/openrelayxyz/plugeth-utils/restricted"
 	
 )
 
@@ -35,6 +36,15 @@ func GetAPIs(stack core.Node, backend core.Backend) []core.API {
 		},
 	}
 	return apis
+}
+
+func InitializeNode(stack core.Node, b restricted.Backend) {
+	go func() {
+			m := map[string]struct{}{
+				"InitializeNode":struct{}{},
+			}
+			hookChan <- m
+	}()
 }
 
 // func OnShutdown(){
@@ -119,8 +129,18 @@ func StateUpdate(blockRoot core.Hash, parentRoot core.Hash, coreDestructs map[co
 	hookChan <- m
 }
 
-// rpc/
+// eth/ethconfig
 
+func pseudoCreateEngine() {
+	if createEngineCalled {
+		m := map[string]struct{}{
+			"CreateEngine":struct{}{},
+		}
+		hookChan <- m
+	}
+}
+
+// rpc/
 
 func GetRPCCalls(method string, id string, params string) {
 	m := map[string]struct{}{
@@ -153,6 +173,8 @@ func RPCSubscriptionTest() {
 // }
 
 var plugins map[string]struct{} = map[string]struct{}{
+	"InitializeNode":struct{}{},
+	"CreateEngine":struct{}{},
 	"OnShutdown": struct{}{},
 	"SetTrieFlushIntervalClone":struct{}{},
 	"StateUpdate": struct{}{},
