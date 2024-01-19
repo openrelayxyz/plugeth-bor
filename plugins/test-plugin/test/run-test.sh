@@ -36,7 +36,7 @@ $GETH init --datadir=./01 genesis.json
 $GETH init --datadir=./02 genesis.json
 
 # miner node
-$GETH --cache.preimages --config=./config00.toml --authrpc.port 8552 --port 64480 --verbosity=0  --nodiscover --networkid=6448 --datadir=./00/ --mine --miner.noverify --miner.etherbase f2c207111cb6ef761e439e56b25c7c99ac026a01 --unlock f2c207111cb6ef761e439e56b25c7c99ac026a01 --http --http.api eth,debug,net,admin,plugeth --http.port 9545 --password passwordfile --allow-insecure-unlock --rpc.allow-unprotected-txs &
+$GETH --cache.preimages --config=./config00.toml --authrpc.port 8552 --port 64480 --verbosity=0  --nodiscover --networkid=6448 --datadir=./00/ --mine --miner.etherbase f2c207111cb6ef761e439e56b25c7c99ac026a01 --unlock f2c207111cb6ef761e439e56b25c7c99ac026a01 --http --http.api eth,debug,net,admin,plugeth --http.port 9545 --password passwordfile --allow-insecure-unlock --rpc.allow-unprotected-txs &
 pid0=$!
 
 # passive node
