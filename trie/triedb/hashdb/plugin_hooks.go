@@ -1,4 +1,4 @@
-package trie
+package hashdb
 
 import (
 	"github.com/ethereum/go-ethereum/log"
