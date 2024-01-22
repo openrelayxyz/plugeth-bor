@@ -50,7 +50,10 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/kzg4844"
+	// begin PluGeth injection - the following package has been replaced with it's counterpart from foundation plugeth
+	// "github.com/ethereum/go-ethereum/crypto/kzg4844"
+	kzg4844 "github.com/ethereum/go-ethereum/crypto/kzg4844-foundationPluGeth"
+	// end PluGeth injection
 	"github.com/ethereum/go-ethereum/eth"
 	ethcatalyst "github.com/ethereum/go-ethereum/eth/catalyst"
 	"github.com/ethereum/go-ethereum/eth/downloader"

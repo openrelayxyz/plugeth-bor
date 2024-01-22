@@ -37,7 +37,10 @@ import (
 	"github.com/ethereum/go-ethereum/core/txpool"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/kzg4844"
+	// begin PluGeth injection - the following package has been replaced with it's counterpart from foundation plugeth
+	// "github.com/ethereum/go-ethereum/crypto/kzg4844"
+	kzg4844 "github.com/ethereum/go-ethereum/crypto/kzg4844-foundationPluGeth"
+	// end PluGeth injection
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/eth/downloader"
 	"github.com/ethereum/go-ethereum/eth/ethconfig"
