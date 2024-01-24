@@ -513,5 +513,5 @@ func (b *Backend) GetAccountTrie(stateRoot core.Hash, account core.Address) (cor
 }
 
 func (b *Backend) GetContractCode(h core.Hash) ([]byte, error) {
-	return state.NewDatabase(b.b.ChainDb()).ContractCode(common.Hash{}, common.Hash(h))
+	return state.NewDatabase(b.b.ChainDb()).ContractCode(common.Address{}, common.Hash(h))
 }

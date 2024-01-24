@@ -25,7 +25,7 @@ func (s *pluginSnapshot) Root() common.Hash {
 	return s.root
 }
 
-func (s *pluginSnapshot) Account(hash common.Hash) (*snapshot.Account, error) {
+func (s *pluginSnapshot) Account(hash common.Hash) (*types.SlimAccount, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -120,5 +120,12 @@ func (ac *acctChecker) trieUpdated(k common.Hash, v []byte) bool {
 	if err != nil {
 		return true
 	}
-	return !bytes.Equal(v, snapshot.SlimAccountRLP(oAcct.Nonce, oAcct.Balance, oAcct.Root, oAcct.CodeHash))
+
+	controlAcct := types.NewEmptyStateAccount()
+	controlAcct.Nonce = oAcct.Nonce
+	controlAcct.Balance = oAcct.Balance
+	controlAcct.Root = oAcct.Root
+	controlAcct.CodeHash = oAcct.CodeHash
+
+	return !bytes.Equal(v, types.SlimAccountRLP(*controlAcct))
 }
