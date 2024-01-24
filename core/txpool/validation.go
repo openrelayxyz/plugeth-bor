@@ -25,10 +25,7 @@ import (
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
-	// begin PluGeth injection - the following package has been replaced with it's counterpart from foundation plugeth
-	// "github.com/ethereum/go-ethereum/crypto/kzg4844"
-	kzg4844 "github.com/ethereum/go-ethereum/crypto/kzg4844-foundationPluGeth"
-	// end PluGeth injection
+	"github.com/ethereum/go-ethereum/crypto/kzg4844"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 )
