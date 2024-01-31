@@ -73,8 +73,12 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 	}
 
 	blockContext := NewEVMBlockContext(header, p.bc, nil)
+	
 	vmenv := vm.NewEVM(blockContext, vm.TxContext{}, statedb, p.config, cfg)
-	signer := types.MakeSigner(p.config, header.Number, header.Time)
+	signer := types.MakeSigner(p.config, header.Number, header.Time)	
+	// begin PluGeth code injection
+	pluginPreProcessBlock(block)
+	// end PluGeth code injection
 	// Iterate over and process the individual transactions
 	for i, tx := range block.Transactions() {
 		if interruptCtx != nil {
@@ -87,16 +91,26 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 
 		msg, err := TransactionToMessage(tx, signer, header.BaseFee)
 		if err != nil {
+			// begin PluGeth injection
+			pluginBlockProcessingError(tx, block, err)
+			// end PluGeth injection
 			return nil, nil, 0, fmt.Errorf("could not apply tx %d [%v]: %w", i, tx.Hash().Hex(), err)
 		}
 
 		statedb.SetTxContext(tx.Hash(), i)
-
+		// begin PluGeth injection
+		pluginPreProcessTransaction(tx, block, i)
+		// end pluGeth injection
 		receipt, err := applyTransaction(msg, p.config, gp, statedb, blockNumber, blockHash, tx, usedGas, vmenv, interruptCtx)
 		if err != nil {
+			// begin PluGeth code injection 
+			pluginBlockProcessingError(tx, block, err)
+			// end PluGeth code injection
 			return nil, nil, 0, fmt.Errorf("could not apply tx %d [%v]: %w", i, tx.Hash().Hex(), err)
 		}
-
+		// begin PluGeth code injection
+		pluginPostProcessTransaction(tx, block, i, receipt)
+		// end PluGeth code injection	
 		receipts = append(receipts, receipt)
 		allLogs = append(allLogs, receipt.Logs...)
 	}
@@ -111,7 +125,9 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 	}
 	// Finalize the block, applying any consensus engine specific extras (e.g. block rewards)
 	p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), withdrawals)
-
+	// begin PluGeth injection
+	pluginPostProcessBlock(block)
+	// end PluGeth code injection
 	return receipts, allLogs, *usedGas, nil
 }
 
