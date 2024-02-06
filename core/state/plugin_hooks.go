@@ -2,11 +2,17 @@ package state
 
 import (
 	"fmt"
+	"time"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/ethereum/go-ethereum/plugins"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/openrelayxyz/plugeth-utils/core"
+)
+
+var (
+	stateUpdateTimer   = metrics.NewRegisteredTimer("plugin/state/update", nil)
 )
 
 type pluginSnapshot struct {
@@ -30,6 +36,8 @@ func (s *pluginSnapshot) Storage(accountHash, storageHash common.Hash) ([]byte, 
 }
 
 func PluginStateUpdate(pl *plugins.PluginLoader, blockRoot, parentRoot common.Hash, destructs map[common.Hash]struct{}, accounts map[common.Hash][]byte, storage map[common.Hash]map[common.Hash][]byte, codeUpdates map[common.Hash][]byte) {
+	start := time.Now()
+	defer stateUpdateTimer.UpdateSince(start)
 	fnList := pl.Lookup("StateUpdate", func(item interface{}) bool {
 		_, ok := item.(func(core.Hash, core.Hash, map[core.Hash]struct{}, map[core.Hash][]byte, map[core.Hash]map[core.Hash][]byte, map[core.Hash][]byte))
 		return ok

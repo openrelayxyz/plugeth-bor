@@ -9,12 +9,26 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/ethereum/go-ethereum/plugins"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/openrelayxyz/plugeth-utils/core"
 )
 
+var (
+	preprocessBlockTimer   = metrics.NewRegisteredTimer("plugins/core/block/preprocess", nil)
+	postprocessBlockTimer   = metrics.NewRegisteredTimer("plugins/core/block/postprocess", nil)
+	sideblockTimer   = metrics.NewRegisteredTimer("plugins/core/block/side", nil)
+	preprocessTxTimer   = metrics.NewRegisteredTimer("plugins/core/tx/preprocess", nil)
+	postprocessTxTimer   = metrics.NewRegisteredTimer("plugins/core/tx/postprocess", nil)
+	processBlockErrorTimer   = metrics.NewRegisteredTimer("plugins/core/block/error", nil)
+	newheadTimer   = metrics.NewRegisteredTimer("plugins/core/newhead", nil)
+	reorgTimer   = metrics.NewRegisteredTimer("plugins/core/reorg", nil)
+)
+
 func PluginPreProcessBlock(pl *plugins.PluginLoader, block *types.Block) {
+	start := time.Now()
+	defer preprocessBlockTimer.UpdateSince(start)
 	fnList := pl.Lookup("PreProcessBlock", func(item interface{}) bool {
 		_, ok := item.(func(core.Hash, uint64, []byte))
 		return ok
@@ -34,6 +48,8 @@ func pluginPreProcessBlock(block *types.Block) {
 	PluginPreProcessBlock(plugins.DefaultPluginLoader, block) // TODO
 }
 func PluginPreProcessTransaction(pl *plugins.PluginLoader, tx *types.Transaction, block *types.Block, i int) {
+	start := time.Now()
+	defer preprocessTxTimer.UpdateSince(start)
 	fnList := pl.Lookup("PreProcessTransaction", func(item interface{}) bool {
 		_, ok := item.(func([]byte, core.Hash, core.Hash, int))
 		return ok
@@ -53,6 +69,8 @@ func pluginPreProcessTransaction(tx *types.Transaction, block *types.Block, i in
 	PluginPreProcessTransaction(plugins.DefaultPluginLoader, tx, block, i)
 }
 func PluginBlockProcessingError(pl *plugins.PluginLoader, tx *types.Transaction, block *types.Block, err error) {
+	start := time.Now()
+	defer processBlockErrorTimer.UpdateSince(start)
 	fnList := pl.Lookup("BlockProcessingError", func(item interface{}) bool {
 		_, ok := item.(func(core.Hash, core.Hash, error))
 		return ok
@@ -71,6 +89,8 @@ func pluginBlockProcessingError(tx *types.Transaction, block *types.Block, err e
 	PluginBlockProcessingError(plugins.DefaultPluginLoader, tx, block, err)
 }
 func PluginPostProcessTransaction(pl *plugins.PluginLoader, tx *types.Transaction, block *types.Block, i int, receipt *types.Receipt) {
+	start := time.Now()
+	defer postprocessTxTimer.UpdateSince(start)
 	fnList := pl.Lookup("PostProcessTransaction", func(item interface{}) bool {
 		_, ok := item.(func(core.Hash, core.Hash, int, []byte))
 		return ok
@@ -90,6 +110,8 @@ func pluginPostProcessTransaction(tx *types.Transaction, block *types.Block, i i
 	PluginPostProcessTransaction(plugins.DefaultPluginLoader, tx, block, i, receipt)
 }
 func PluginPostProcessBlock(pl *plugins.PluginLoader, block *types.Block) {
+	start := time.Now()
+	defer postprocessBlockTimer.UpdateSince(start)
 	fnList := pl.Lookup("PostProcessBlock", func(item interface{}) bool {
 		_, ok := item.(func(core.Hash))
 		return ok
@@ -109,6 +131,8 @@ func pluginPostProcessBlock(block *types.Block) {
 }
 
 func PluginNewHead(pl *plugins.PluginLoader, block *types.Block, hash common.Hash, logs []*types.Log, td *big.Int) {
+	start := time.Now()
+	defer newheadTimer.UpdateSince(start)
 	fnList := pl.Lookup("NewHead", func(item interface{}) bool {
 		_, ok := item.(func([]byte, core.Hash, [][]byte, *big.Int))
 		return ok
@@ -135,6 +159,8 @@ func pluginNewHead(block *types.Block, hash common.Hash, logs []*types.Log, td *
 }
 
 func PluginNewSideBlock(pl *plugins.PluginLoader, block *types.Block, hash common.Hash, logs []*types.Log) {
+	start := time.Now()
+	defer sideblockTimer.UpdateSince(start)
 	fnList := pl.Lookup("NewSideBlock", func(item interface{}) bool {
 		_, ok := item.(func([]byte, core.Hash, [][]byte))
 		return ok
@@ -159,6 +185,8 @@ func pluginNewSideBlock(block *types.Block, hash common.Hash, logs []*types.Log)
 }
 
 func PluginReorg(pl *plugins.PluginLoader, commonBlock *types.Block, oldChain, newChain types.Blocks) {
+	start := time.Now()
+	defer reorgTimer.UpdateSince(start)
 	fnList := pl.Lookup("Reorg", func(item interface{}) bool {
 		_, ok := item.(func(core.Hash, []core.Hash, []core.Hash))
 		return ok
