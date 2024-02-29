@@ -8,9 +8,11 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/ethereum/go-ethereum/plugins"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/openrelayxyz/plugeth-utils/core"
 )
@@ -236,4 +238,30 @@ func pluginSetTrieFlushIntervalClone(flushInterval time.Duration) time.Duration 
 		return flushInterval
 	}
 	return PluginSetTrieFlushIntervalClone(plugins.DefaultPluginLoader, flushInterval)
+}
+
+func PluginSnapshotDBPath(pl *plugins.PluginLoader, defaultDb ethdb.KeyValueStore) ethdb.KeyValueStore {
+	if fn, ok := plugins.LookupOne[func() (string, int, int, string)](pl, "SnapshotDBDetails"); ok {
+		file, cache, handles, namespace := fn()
+		if db, err := rawdb.Open(rawdb.OpenOptions{
+			Directory: file,
+			Cache: cache,
+			Handles: handles,
+			Namespace: namespace,
+		}); err != nil {
+			log.Warn("Snapshot DB failed to open. Using default.", "err", err)
+			return defaultDb
+		} else {
+			return db
+		}
+	}
+	return defaultDb
+}
+
+func pluginSnapshotDBPath(defaultDb ethdb.KeyValueStore) ethdb.KeyValueStore {
+	if plugins.DefaultPluginLoader == nil {
+		log.Warn("Attempting pluginSnapshotDBPath, but default PluginLoader has not been initialized")
+		return defaultDb
+	}
+	return PluginSnapshotDBPath(plugins.DefaultPluginLoader, defaultDb)
 }
