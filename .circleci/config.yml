@@ -58,8 +58,8 @@ jobs:
             export GOPATH=$HOME/go
             export GOARCH=amd64
             export PLUGETH_UTILS_VERSION=$(grep "github.com/openrelayxyz/plugeth-utils v" go.mod | cut -d ' ' -f 2)
-            go build -o ./artifacts/geth-linux-amd64-$PLUGETH_UTILS_VERSION-${CIRCLE_TAG} ./cmd/geth
-            CC=aarch64-linux-gnu-gcc CGO_ENABLED=1 GOARCH=arm64  go build -o ./artifacts/geth-linux-arm64-$PLUGETH_UTILS_VERSION-${CIRCLE_TAG} ./cmd/geth
+            go build -o ./artifacts/geth-linux-amd64-$PLUGETH_UTILS_VERSION-${CIRCLE_TAG} ./cmd/cli
+            CC=aarch64-linux-gnu-gcc CGO_ENABLED=1 GOARCH=arm64  go build -o ./artifacts/geth-linux-arm64-$PLUGETH_UTILS_VERSION-${CIRCLE_TAG} ./cmd/cli
       - run:
           name: "Publish Release on GitHub"
           command: |
