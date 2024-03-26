@@ -1661,38 +1661,36 @@ func (s *StateDB) Commit(block uint64, deleteEmptyObjects bool) (common.Hash, er
 	}
 	// Handle all state updates afterwards
 	for addr := range s.stateObjectsDirty {
-		if obj := s.stateObjects[addr]; !obj.deleted {
-			// Write any contract code associated with the state object
-			if obj.code != nil && obj.dirtyCode {
-				rawdb.WriteCode(codeWriter, common.BytesToHash(obj.CodeHash()), obj.code)
-				// begin PluGeth injection
-				codeUpdates[common.BytesToHash(obj.CodeHash())] = obj.code
-				// end PluGeth injection
-				obj.dirtyCode = false
-			}
-			// Write any storage changes in the state object to its storage trie
-			set, err := obj.commit()
-			if err != nil {
+		obj := s.stateObjects[addr]
+		if obj.deleted {
+			continue
+		}
+		// Write any contract code associated with the state object
+		if obj.code != nil && obj.dirtyCode {
+			rawdb.WriteCode(codeWriter, common.BytesToHash(obj.CodeHash()), obj.code)
+			// begin PluGeth injection
+			codeUpdates[common.BytesToHash(obj.CodeHash())] = obj.code
+			// end PluGeth injection
+			obj.dirtyCode = false
+		}
+		// Write any storage changes in the state object to its storage trie
+		set, err := obj.commit()
+		if err != nil {
+			return common.Hash{}, err
+		}
+		// Merge the dirty nodes of storage trie into global set. It is possible
+		// that the account was destructed and then resurrected in the same block.
+		// In this case, the node set is shared by both accounts.
+		if set != nil {
+			if err := nodes.Merge(set); err != nil {
 				return common.Hash{}, err
 			}
-
-			// Merge the dirty nodes of storage trie into global set. It is possible
-			// that the account was destructed and then resurrected in the same block.
-			// In this case, the node set is shared by both accounts.
-			if set != nil {
-				if err := nodes.Merge(set); err != nil {
-					return common.Hash{}, err
-				}
-				updates, deleted := set.Size()
-				storageTrieNodesUpdated += updates
-				storageTrieNodesDeleted += deleted
-			}
-			// updates, deleted := set.Size()
-			// storageTrieNodesUpdated += updates
-			// storageTrieNodesDeleted += deleted
+			updates, deleted := set.Size()
+			storageTrieNodesUpdated += updates
+			storageTrieNodesDeleted += deleted
 		}
 	}
-
+	
 	if codeWriter.ValueSize() > 0 {
 		if err := codeWriter.Write(); err != nil {
 			log.Crit("Failed to commit dirty codes", "error", err)
