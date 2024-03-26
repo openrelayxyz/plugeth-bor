@@ -1,11 +1,9 @@
 ---
-name: Question/Support
-about: Ask a question or request support
+name: Ask a question
+about: Something is unclear
 title: ''
 labels: 'type:docs'
 assignees: ''
 ---
 
-This should only be used in very rare cases e.g. if you are not 100% sure if something is a bug or asking a question that leads to improving the documentation. 
-
-For general questions please join our [discord](https://discord.com/invite/0xPolygonDevs) server.
+For questions about PluGeth you will likely get faster responses by reaching out to us on at #plugeth channel on [discord](https://discord.gg/J3tQMWCVPn).

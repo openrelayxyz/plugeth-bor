@@ -1,6 +1,6 @@
 ---
 name: Request a feature
-about: Report a missing feature - e.g. as a step before submitting a PR
+about: Are you looking for data this is not currently exposed through plugin hooks? Let us know. 
 title: ''
 labels: 'type:feature'
 assignees: ''
@@ -8,11 +8,11 @@ assignees: ''
 
 # Rationale
 
-The motivation behind the feature and why should this feature exist?
+Why should this feature exist?
 What are the use-cases?
 
 # Implementation
 
-Do you have ideas regarding the implementation of this feature? (Mention reference links if any)
-Any alternative solutions or features you've considered?
+Do you have ideas regarding the implementation of this feature?
 Are you willing to implement this feature?
+
