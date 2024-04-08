@@ -45,6 +45,19 @@ func PluginStateUpdate(pl *plugins.PluginLoader, blockRoot, parentRoot common.Ha
 	})
 	coreDestructs := make(map[core.Hash]struct{})
 	for k, v := range destructs {
+		if _, ok := accounts[k]; ok && !checker.hadStorage(k) {
+			// If an account is in both destructs and accounts, that means it was
+			// "destroyed" and recreated in the same block. Especially post-cancun,
+			// that generally means that an account that had ETH but no code got
+			// replaced by an account that had code.
+			//
+			// If there's data in the accounts map, we only need to process this
+			// account if there are storage slots we need to clear out, so we
+			// check the account storage for the empty root. If it's empty, we can
+			// skip this destruct. We need this check to normalize parallel blocks
+			// with serial blocks, because they report destructs differently.
+			continue
+		}
 		coreDestructs[core.Hash(k)] = v
 	}
 	coreAccounts := make(map[core.Hash][]byte)
@@ -86,6 +99,37 @@ func pluginStateUpdate(blockRoot, parentRoot common.Hash, snap snapshot.Snapshot
 type acctChecker struct {
 	snap snapshot.Snapshot
 	trie Trie
+}
+
+func (ac *acctChecker) hadStorage(k common.Hash) bool {
+	if hadStorage, ok := ac.snapHadStorage(k); ok {
+		return hadStorage
+	}
+	return ac.trieHadStorage(k)
+}
+
+func (ac *acctChecker) snapHadStorage(k common.Hash) (bool, bool) {
+	acct, err := ac.snap.Account(k)
+	if err != nil {
+		return false, false
+	}
+	if len(acct.Root) > 0 && !bytes.Equal(acct.Root, types.EmptyRootHash.Bytes()) {
+		return true, true
+	}
+	return false, true
+}
+
+func (ac *acctChecker) trieHadStorage(k common.Hash) bool {
+	trie, ok := ac.trie.(acctByHasher)
+	if !ok {
+		log.Warn("Couldn't check trie updates, wrong trie type")
+		return true
+	}
+	acct, err := trie.GetAccountByHash(k)
+	if err != nil {
+		return true
+	}
+	return acct.Root != types.EmptyRootHash
 }
 
 func (ac *acctChecker) updated(k common.Hash, v []byte) bool {
