@@ -110,7 +110,7 @@ func (ac *acctChecker) hadStorage(k common.Hash) bool {
 
 func (ac *acctChecker) snapHadStorage(k common.Hash) (bool, bool) {
 	acct, err := ac.snap.Account(k)
-	if err != nil {
+	if err != nil || acct == nil {
 		return false, false
 	}
 	if len(acct.Root) > 0 && !bytes.Equal(acct.Root, types.EmptyRootHash.Bytes()) {
