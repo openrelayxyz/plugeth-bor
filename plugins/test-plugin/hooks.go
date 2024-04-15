@@ -120,6 +120,12 @@ func AppendAncient(number uint64, hash, header, body, receipts, td []byte) {
 
 func StateUpdate(blockRoot core.Hash, parentRoot core.Hash, coreDestructs map[core.Hash]struct{}, coreAccounts map[core.Hash][]byte, coreStorage map[core.Hash]map[core.Hash][]byte, coreCode map[core.Hash][]byte) {
 	// log.Warn("StatueUpdate", "blockRoot", blockRoot, "parentRoot", parentRoot, "coreDestructs", coreDestructs, "coreAccounts", coreAccounts, "coreStorage", coreStorage, "coreCode", coreCode)
+	hash := core.HexToHash("0xbc6833c896fade426a26bed9c34ca5477e6aec181ae4428c606e28b9eb947b89")
+	if _, ok := coreAccounts[hash]; ok {
+		if _, ok := coreDestructs[hash]; ok {
+			panic("deployed contract still present in coreDestructs map")
+		}
+	}
 	m := map[string]struct{}{
 		"StateUpdate":struct{}{},
 	}

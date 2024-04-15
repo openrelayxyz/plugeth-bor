@@ -116,7 +116,7 @@ func txFactory() {
 
 	tx0_params := map[string]interface{}{
 		"from": coinBase,
-		"to": coinBase,
+		"to": "0x0030921c7d32ee536034db89d654f675809751dC",
 		"value": (*hexutil.Big)(big.NewInt(1)),
 	}
 	
