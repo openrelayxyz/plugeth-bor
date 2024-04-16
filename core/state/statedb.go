@@ -180,15 +180,6 @@ func New(root common.Hash, db Database, snaps *snapshot.Tree) (*StateDB, error) 
 	if sdb.snaps != nil {
 		sdb.snap = sdb.snaps.Snapshot(root)
 	}
-	// // Start PluGeth section
-	// if sdb.snap == nil {
-	// 	log.Debug("Snapshots not availble. Using plugin snapshot.")
-	// 	sdb.snap = &pluginSnapshot{root}
-	// 	sdb.stateObjectsDestruct = make(map[common.Address]struct{})
-	// 	sdb.snapAccounts = make(map[common.Hash][]byte)
-	// 	sdb.snapStorage = make(map[common.Hash]map[common.Hash][]byte)
-	// }
-	// // End PluGeth section
 	// Start PluGeth section
 	if sdb.snap == nil {
 		log.Debug("Snapshots not availble. Using plugin snapshot.")
@@ -1435,6 +1426,11 @@ func (s *StateDB) clearJournalAndRefund() {
 // storage iteration and constructs trie node deletion markers by creating
 // stack trie with iterated slots.
 func (s *StateDB) fastDeleteStorage(addrHash common.Hash, root common.Hash) (bool, common.StorageSize, map[common.Hash][]byte, *trienode.NodeSet, error) {
+	// begin PluGeth Injection // this injection is neccessary to enable the native geth tests in core/state to pass
+	if _, err := s.snap.Account(addrHash); err != nil {
+		return false, 0, nil, nil, err
+	}
+	// end PluGeth Injection
 	iter, err := s.snaps.StorageIterator(s.originalRoot, addrHash, common.Hash{})
 	if err != nil {
 		return false, 0, nil, nil, err
