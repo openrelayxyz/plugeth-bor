@@ -3,7 +3,10 @@ package core
 import (
 	"testing"
 	"math/big"
+
+	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/plugins"
+
 	"github.com/openrelayxyz/plugeth-utils/core"
 )
 
@@ -22,7 +25,7 @@ func TestReorgLongHeadersHook(t *testing.T) {
 		}
 	})
 	defer done()
-	testReorgLong(t, true)
+	testReorgLong(t, true, rawdb.HashScheme)
 	if !invoked {
 		t.Errorf("Expected plugin invocation")
 	}
