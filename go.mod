@@ -71,6 +71,7 @@ require (
 	github.com/openrelayxyz/plugeth-utils v1.5.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/peterh/liner v1.2.0
+	github.com/prometheus/tsdb v0.10.0
 	github.com/protolambda/bls12-381-util v0.0.0-20220416220906-d8552aa452c7
 	github.com/rs/cors v1.8.2
 	github.com/ryanuber/columnize v2.1.2+incompatible
