@@ -107,6 +107,22 @@ func (b *Backend) BlockByHash(ctx context.Context, hash core.Hash) ([]byte, erro
 	}
 	return rlp.EncodeToBytes(block)
 }
+type InsertBackend interface {
+	InsertBlock(*types.Block) error
+}
+
+func (b *Backend) InsertBlock(data []byte) error {
+	insertBackend, ok := b.b.(InsertBackend)
+	if !ok {
+		return fmt.Errorf("InsertBlock not supported by this backend")
+	}
+	var block types.Block
+	if err := rlp.DecodeBytes(data, &block); err != nil {
+		return err
+	}
+	return insertBackend.InsertBlock(&block)
+}
+
 func (b *Backend) GetReceipts(ctx context.Context, hash core.Hash) ([]byte, error) {
 	receipts, err := b.b.GetReceipts(ctx, common.Hash(hash))
 	if err != nil {
