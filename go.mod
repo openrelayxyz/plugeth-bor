@@ -2,8 +2,6 @@ module github.com/ethereum/go-ethereum
 
 go 1.22
 
-toolchain go1.22.1
-
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.3.2
 	github.com/BurntSushi/toml v1.4.0
