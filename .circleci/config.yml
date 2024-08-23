@@ -56,8 +56,8 @@ jobs:
             sudo apt install gcc-aarch64-linux-gnu libc6-dev-arm64-cross wget -y
             export GOPATH=$HOME/go
             export GOARCH=amd64
-            go build -o ./artifacts/geth-linux-amd64-${CIRCLE_TAG} ./cmd/geth
-            CC=aarch64-linux-gnu-gcc CGO_ENABLED=1 GOARCH=arm64  go build -o ./artifacts/geth-linux-arm64-${CIRCLE_TAG} ./cmd/geth
+            go build -o ./artifacts/bor-linux-amd64-${CIRCLE_TAG} ./cmd/cli
+            CC=aarch64-linux-gnu-gcc CGO_ENABLED=1 GOARCH=arm64  go build -o ./artifacts/bor-linux-arm64-${CIRCLE_TAG} ./cmd/cli
       - run:
           name: "Publish Release on GitHub"
           command: |
@@ -72,12 +72,12 @@ jobs:
       - run:
           name: push to s3
           command: |
-            aws s3 cp ./artifacts/geth-linux-amd64-${CIRCLE_TAG} s3://ethercattle-binaries/plugeth2/$CIRCLE_TAG/geth-linux-amd64 --acl=public-read
-            aws s3 cp ./artifacts/geth-linux-arm64-${CIRCLE_TAG} s3://ethercattle-binaries/plugeth2/$CIRCLE_TAG/geth-linux-arm64 --acl=public-read
+            aws s3 cp ./artifacts/bor-linux-amd64-${CIRCLE_TAG} s3://ethercattle-binaries/plugeth2/$CIRCLE_TAG/bor-linux-amd64 --acl=public-read
+            aws s3 cp ./artifacts/bor-linux-arm64-${CIRCLE_TAG} s3://ethercattle-binaries/plugeth2/$CIRCLE_TAG/bor-linux-arm64 --acl=public-read
       - run:
           name: Message Slack
           command: |
-              ./slack-post.sh -w $SLACK_WEBHOOK -m "*plugeth2*:\nTag: $CIRCLE_TAG \n"
+              ./slack-post.sh -w $SLACK_WEBHOOK -m "*plugeth-bor2*:\nTag: $CIRCLE_TAG \n"
 
 workflows:
   version: 2
