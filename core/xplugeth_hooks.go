@@ -61,12 +61,12 @@ func pluginReorg(commonBlock *types.Block, oldChain, newChain types.Blocks) {
 }
 
 func pluginSetTrieFlushIntervalClone(flushInterval time.Duration) time.Duration {
-	m := xplugeth.GetModules[setTrieFlushIntervalClonePlugin]()
+	modules := xplugeth.GetModules[setTrieFlushIntervalClonePlugin]()
 	var snc sync.Once
-	if len(m) > 1 {
+	if len(modules) > 1 {
 		snc.Do(func() { log.Warn("The blockChain flushInterval value is being accessed by multiple plugins") })
 	}
-	for _, m := range m {
+	for _, m := range modules {
 		flushInterval = m.SetTrieFlushIntervalClone(flushInterval)
 	}
 	return flushInterval
