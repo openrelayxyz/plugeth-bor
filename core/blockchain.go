@@ -1643,7 +1643,7 @@ func (bc *BlockChain) writeKnownBlock(block *types.Block) error {
 func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.Receipt, logs []*types.Log, state *state.StateDB) ([]*types.Log, error) {
 	//begin PluGeth injection
 	var interval time.Duration
-	_ = PluginSetTrieFlushIntervalClone(interval) // this is being called here to engage a testing scenario
+	_ = pluginSetTrieFlushIntervalClone(interval) // this is being called here to engage a testing scenario
 	//end PluGeth injection
 
 	// Calculate the total difficulty of the block
@@ -1741,7 +1741,7 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	// If we exceeded time allowance, flush an entire trie to disk
 
 	// begin PluGeth code injection
-	flushInterval = PluginSetTrieFlushIntervalClone(flushInterval)
+	flushInterval = pluginSetTrieFlushIntervalClone(flushInterval)
 	// end PluGeth code injection
 
 	if bc.gcproc > flushInterval {
@@ -1830,7 +1830,7 @@ func (bc *BlockChain) writeBlockAndSetHead(ctx context.Context, block *types.Blo
 
 	if status == CanonStatTy {
 		// begin plugeth injection
-		PluginNewHead(block, block.Hash(), logs, externTd)
+		pluginNewHead(block, block.Hash(), logs, externTd)
 		// end plugeth injection
 		bc.chainFeed.Send(ChainEvent{Block: block, Hash: block.Hash(), Logs: logs})
 
@@ -1858,7 +1858,7 @@ func (bc *BlockChain) writeBlockAndSetHead(ctx context.Context, block *types.Blo
 		}
 	} else {
 		//begin PluGeth injection
-		PluginNewSideBlock(block, block.Hash(), logs)
+		pluginNewSideBlock(block, block.Hash(), logs)
 		//end PluGeth injection
 		bc.chainSideFeed.Send(ChainSideEvent{Block: block})
 
@@ -2693,7 +2693,7 @@ func (bc *BlockChain) reorg(oldHead *types.Header, newHead *types.Block) error {
 			logFn = log.Warn
 		}
 		//begin PluGeth code injection
-		PluginReorg(commonBlock, oldChain, newChain)
+		pluginReorg(commonBlock, oldChain, newChain)
 		//end PluGeth code injection
 		logFn(msg, "number", commonBlock.Number(), "hash", commonBlock.Hash(),
 			"drop", len(oldChain), "dropfrom", oldChain[0].Hash(), "add", len(newChain), "addfrom", newChain[0].Hash())
@@ -2929,7 +2929,7 @@ func (bc *BlockChain) SetCanonical(head *types.Block) (common.Hash, error) {
 	if ptd != nil {
 		externTd = new(big.Int).Add(head.Difficulty(), ptd)
 	}
-	PluginNewHead(head, head.Hash(), logs, externTd)
+	pluginNewHead(head, head.Hash(), logs, externTd)
 	// end PluGeth code injection
 	bc.chainHeadFeed.Send(ChainHeadEvent{Block: head})
 

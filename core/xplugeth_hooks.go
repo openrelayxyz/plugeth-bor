@@ -12,19 +12,19 @@ import (
 )
 
 type newHeadPlugin interface {
-	PluginNewHead(block *types.Block, hash common.Hash, logs []*types.Log, td *big.Int)
+	NewHead(block *types.Block, hash common.Hash, logs []*types.Log, td *big.Int)
 }
 
 type newSideBlockPlugin interface {
-	PluginNewSideBlock(block *types.Block, hash common.Hash, logs []*types.Log)
+	NewSideBlock(block *types.Block, hash common.Hash, logs []*types.Log)
 }
 
 type reorgPlugin interface {
-	PluginReorg(commonBlock *types.Block, oldChain, newChain types.Blocks)
+	Reorg(commonBlock common.Hash, oldChain, newChain []common.Hash)
 }
 
 type setTrieFlushIntervalClonePlugin interface {
-	PluginSetTrieFlushIntervalClone(flushInterval time.Duration) time.Duration
+	SetTrieFlushIntervalClone(flushInterval time.Duration) time.Duration
 }
 
 func init() {
@@ -34,32 +34,40 @@ func init() {
 	xplugeth.RegisterHook[setTrieFlushIntervalClonePlugin]()
 }
 
-func PluginNewHead(block *types.Block, hash common.Hash, logs []*types.Log, td *big.Int) {
+func pluginNewHead(block *types.Block, hash common.Hash, logs []*types.Log, td *big.Int) {
 	for _, m := range xplugeth.GetModules[newHeadPlugin]() {
-		m.PluginNewHead(block, hash, logs, td)
+		m.NewHead(block, hash, logs, td)
 	}
 }
 
-func PluginNewSideBlock(block *types.Block, hash common.Hash, logs []*types.Log) {
+func pluginNewSideBlock(block *types.Block, hash common.Hash, logs []*types.Log) {
 	for _, m := range xplugeth.GetModules[newSideBlockPlugin]() {
-		m.PluginNewSideBlock(block, hash, logs)
+		m.NewSideBlock(block, hash, logs)
 	}
 }
 
-func PluginReorg(commonBlock *types.Block, oldChain, newChain types.Blocks) {
+func pluginReorg(commonBlock *types.Block, oldChain, newChain types.Blocks) {
+	oldChainHashes := make([]common.Hash, len(oldChain))
+	for i, block := range oldChain {
+		oldChainHashes[i] = block.Hash()
+	}
+	newChainHashes := make([]common.Hash, len(newChain))
+	for i, block := range newChain {
+		newChainHashes[i] = block.Hash()
+	}
 	for _, m := range xplugeth.GetModules[reorgPlugin]() {
-		m.PluginReorg(commonBlock, oldChain, newChain)
+		m.Reorg(commonBlock.Hash(), oldChainHashes, newChainHashes)
 	}
 }
 
-func PluginSetTrieFlushIntervalClone(flushInterval time.Duration) time.Duration {
+func pluginSetTrieFlushIntervalClone(flushInterval time.Duration) time.Duration {
 	m := xplugeth.GetModules[setTrieFlushIntervalClonePlugin]()
 	var snc sync.Once
 	if len(m) > 1 {
 		snc.Do(func() { log.Warn("The blockChain flushInterval value is being accessed by multiple plugins") })
 	}
 	for _, m := range m {
-		flushInterval = m.PluginSetTrieFlushIntervalClone(flushInterval)
+		flushInterval = m.SetTrieFlushIntervalClone(flushInterval)
 	}
 	return flushInterval
 }
