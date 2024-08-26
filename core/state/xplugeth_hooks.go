@@ -26,7 +26,7 @@ type acctByHasher interface {
 }
 
 type stateUpdatePlugin interface {
-	PluginStateUpdate(blockRoot, parentRoot common.Hash, snap snapshot.Snapshot, trie Trie, destructs map[common.Hash]struct{}, accounts map[common.Hash][]byte, storage map[common.Hash]map[common.Hash][]byte, codeUpdates map[common.Hash][]byte)
+	StateUpdate(blockRoot, parentRoot common.Hash, snap snapshot.Snapshot, trie Trie, destructs map[common.Hash]struct{}, accounts map[common.Hash][]byte, storage map[common.Hash]map[common.Hash][]byte, codeUpdates map[common.Hash][]byte)
 }
 
 func init() {
@@ -66,7 +66,7 @@ func (ac *acctChecker) updated(k common.Hash, v []byte) bool {
 	return ac.trieUpdated(k, v)
 }
 
-func PluginStateUpdate(blockRoot, parentRoot common.Hash, snap snapshot.Snapshot, trie Trie, destructs map[common.Hash]struct{}, accounts map[common.Hash][]byte, storage map[common.Hash]map[common.Hash][]byte, codeUpdates map[common.Hash][]byte) {
+func pluginStateUpdate(blockRoot, parentRoot common.Hash, snap snapshot.Snapshot, trie Trie, destructs map[common.Hash]struct{}, accounts map[common.Hash][]byte, storage map[common.Hash]map[common.Hash][]byte, codeUpdates map[common.Hash][]byte) {
 	checker := &acctChecker{snap, trie}
 
 	filteredDestructs := make(map[common.Hash]struct{})
@@ -105,8 +105,8 @@ func PluginStateUpdate(blockRoot, parentRoot common.Hash, snap snapshot.Snapshot
 	}
 	acctCheckTimer.UpdateSince(start)
 
-	for _, update := range xplugeth.GetModules[stateUpdatePlugin]() {
-		update.PluginStateUpdate(blockRoot, parentRoot, snap, trie, filteredDestructs, filteredAccounts, storage, codeUpdates)
+	for _, m := range xplugeth.GetModules[stateUpdatePlugin]() {
+		m.StateUpdate(blockRoot, parentRoot, snap, trie, filteredDestructs, filteredAccounts, storage, codeUpdates)
 	}
 }
 
