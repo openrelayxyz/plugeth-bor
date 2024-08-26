@@ -415,7 +415,7 @@ func (db *Database) Commit(node common.Hash, report bool) error {
 	// by only uncaching existing data when the database write finalizes.
 
 	// begin PluGeth injection
-	PluginPreTrieCommit(node)
+	pluginPreTrieCommit(node)
 	// end PluGeth injection
 
 	start := time.Now()
@@ -457,7 +457,7 @@ func (db *Database) Commit(node common.Hash, report bool) error {
 	db.flushnodes, db.flushsize, db.flushtime = 0, 0, 0
 
 	// begin PluGeth injection
-	PluginPostTrieCommit(node)
+	pluginPostTrieCommit(node)
 	// end PluGeth injection
 
 	return nil

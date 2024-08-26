@@ -2,16 +2,15 @@ package hashdb
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/openrelayxyz/plugeth-utils/core"
 	"github.com/openrelayxyz/xplugeth"
 )
 
 type preTrieCommit interface {
-	PreTrieCommit(node core.Hash)
+	PreTrieCommit(node common.Hash)
 }
 
 type postTrieCommit interface {
-	PostTrieCommit(node core.Hash)
+	PostTrieCommit(node common.Hash)
 }
 
 func init() {
@@ -19,14 +18,14 @@ func init() {
 	xplugeth.RegisterHook[postTrieCommit]()
 }
 
-func PluginPreTrieCommit(node common.Hash) {
+func pluginPreTrieCommit(node common.Hash) {
 	for _, m := range xplugeth.GetModules[preTrieCommit]() {
-		m.PreTrieCommit(core.Hash(node))
+		m.PreTrieCommit(node)
 	}
 }
 
-func PluginPostTrieCommit(node common.Hash) {
+func pluginPostTrieCommit(node common.Hash) {
 	for _, m := range xplugeth.GetModules[postTrieCommit]() {
-		m.PostTrieCommit(core.Hash(node))
+		m.PostTrieCommit(node)
 	}
 }
