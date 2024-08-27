@@ -8,6 +8,7 @@ import (
 	"plugin"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
@@ -27,10 +28,24 @@ type PluginLoader struct {
 	Subcommands map[string]Subcommand
 	Flags       []*flag.FlagSet
 	LookupCache map[string][]interface{}
+	lock       sync.RWMutex
+}
+
+func (pl *PluginLoader) cacheLookup(name string) ([]interface{}, bool) {
+	pl.lock.RLock()
+	defer pl.lock.RUnlock()
+	v, ok := pl.LookupCache[name]
+	return v, ok
+}
+
+func (pl *PluginLoader) cacheSet(name string, value []interface{}) {
+	pl.lock.Lock()
+	defer pl.lock.Unlock()
+	pl.LookupCache[name] = value
 }
 
 func (pl *PluginLoader) Lookup(name string, validate func(interface{}) bool) []interface{} {
-	if v, ok := pl.LookupCache[name]; ok {
+	if v, ok := pl.cacheLookup(name); ok {
 		return v
 	}
 	results := []interface{}{}
@@ -43,7 +58,7 @@ func (pl *PluginLoader) Lookup(name string, validate func(interface{}) bool) []i
 			}
 		}
 	}
-	pl.LookupCache[name] = results
+	pl.cacheSet(name, results)
 	return results
 }
 
@@ -151,9 +166,13 @@ func RunSubcommand(ctx *cli.Context) (bool, error) {
 }
 
 func (pl *PluginLoader) ParseFlags(args []string) bool {
+	masterFlagSet := *flag.NewFlagSet("master-plugin-flagset", flag.ContinueOnError)
 	for _, flagset := range pl.Flags {
-		flagset.Parse(args)
+		flagset.VisitAll(func(f *flag.Flag) {
+			masterFlagSet.Var(f.Value, f.Name, f.Usage)
+		})
 	}
+	masterFlagSet.Parse(args)
 	return len(pl.Flags) > 0
 }
 

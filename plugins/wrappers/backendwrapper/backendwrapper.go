@@ -489,7 +489,7 @@ func CloneChainConfig(cf *gparams.ChainConfig) *params.ChainConfig {
 }
 
 func (b *Backend) GetTrie(h core.Hash) (core.Trie, error) {
-	tr, err := trie.NewStateTrie(trie.TrieID(common.Hash(h)), trie.NewDatabase(b.b.ChainDb()))
+	tr, err := trie.NewStateTrie(trie.TrieID(common.Hash(h)), trie.NewDatabase(b.b.ChainDb(), nil))
 	if err != nil {
 		return nil, err
 	}
@@ -505,7 +505,7 @@ func (b *Backend) GetAccountTrie(stateRoot core.Hash, account core.Address) (cor
 	if err != nil {
 		return nil, err
 	}
-	acTr, err := trie.NewStateTrie(trie.StorageTrieID(common.Hash(stateRoot), crypto.Keccak256Hash(account[:]), common.Hash(act.Root)), trie.NewDatabase(b.b.ChainDb()))
+	acTr, err := trie.NewStateTrie(trie.StorageTrieID(common.Hash(stateRoot), crypto.Keccak256Hash(account[:]), common.Hash(act.Root)), trie.NewDatabase(b.b.ChainDb(), nil))
 	if err != nil {
 		return nil, err
 	}

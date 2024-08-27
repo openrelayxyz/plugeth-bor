@@ -18,7 +18,6 @@ package tracers
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"encoding/hex"
 	"encoding/json"
@@ -213,6 +212,7 @@ type TraceCallConfig struct {
 	TraceConfig
 	StateOverrides *ethapi.StateOverride
 	BlockOverrides *ethapi.BlockOverrides
+	TxIndex        *hexutil.Uint
 }
 
 // StdTraceConfig holds extra parameters to standard-json trace functions.
@@ -466,8 +466,8 @@ func (api *API) traceChain(start, end *types.Block, config *TraceConfig, closed 
 			var preferDisk bool
 
 			if statedb != nil {
-				s1, s2 := statedb.Database().TrieDB().Size()
-				preferDisk = s1+s2 > defaultTracechainMemLimit
+				s1, s2, s3 := statedb.Database().TrieDB().Size()
+				preferDisk = s1+s2+s3 > defaultTracechainMemLimit
 			}
 
 			statedb, release, err = api.backend.StateAtBlock(ctx, block, reexec, statedb, false, preferDisk)
@@ -564,7 +564,7 @@ func (api *API) TraceBlockByHash(ctx context.Context, hash common.Hash, config *
 // and returns them as a JSON object.
 func (api *API) TraceBlock(ctx context.Context, blob hexutil.Bytes, config *TraceConfig) ([]*txTraceResult, error) {
 	block := new(types.Block)
-	if err := rlp.Decode(bytes.NewReader(blob), block); err != nil {
+	if err := rlp.DecodeBytes(blob, block); err != nil {
 		return nil, fmt.Errorf("could not decode block: %v", err)
 	}
 
@@ -835,8 +835,10 @@ func (api *API) traceBlock(ctx context.Context, block *types.Block, config *Trac
 
 				if stateSyncPresent && task.index == len(txs)-1 {
 					if *config.BorTraceEnabled {
-						config.BorTx = newBoolPtr(true)
-						res, err = api.traceTx(ctx, msg, txctx, blockCtx, task.statedb, config)
+						// avoid data race
+						newConfig := *config
+						newConfig.BorTx = newBoolPtr(true)
+						res, err = api.traceTx(ctx, msg, txctx, blockCtx, task.statedb, &newConfig)
 					} else {
 						break
 					}
@@ -1221,11 +1223,17 @@ func (api *API) TraceTransaction(ctx context.Context, hash common.Hash, config *
 // TraceCall lets you trace a given eth_call. It collects the structured logs
 // created during the execution of EVM if the given transaction was added on
 // top of the provided block and returns them as a JSON object.
+// If no transaction index is specified, the trace will be conducted on the state
+// after executing the specified block. However, if a transaction index is provided,
+// the trace will be conducted on the state after executing the specified transaction
+// within the specified block.
 func (api *API) TraceCall(ctx context.Context, args ethapi.TransactionArgs, blockNrOrHash rpc.BlockNumberOrHash, config *TraceCallConfig) (interface{}, error) {
 	// Try to retrieve the specified block
 	var (
-		err   error
-		block *types.Block
+		err     error
+		block   *types.Block
+		statedb *state.StateDB
+		release StateReleaseFunc
 	)
 
 	if hash, ok := blockNrOrHash.Hash(); ok {
@@ -1254,7 +1262,11 @@ func (api *API) TraceCall(ctx context.Context, args ethapi.TransactionArgs, bloc
 		reexec = *config.Reexec
 	}
 
-	statedb, release, err := api.backend.StateAtBlock(ctx, block, reexec, nil, true, false)
+	if config != nil && config.TxIndex != nil {
+		_, _, statedb, release, err = api.backend.StateAtTransaction(ctx, block, int(*config.TxIndex), reexec)
+	} else {
+		statedb, release, err = api.backend.StateAtBlock(ctx, block, reexec, nil, true, false)
+	}
 	if err != nil {
 		return nil, err
 	}
