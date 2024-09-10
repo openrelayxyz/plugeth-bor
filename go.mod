@@ -67,6 +67,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/naoina/toml v0.1.1
 	github.com/olekukonko/tablewriter v0.0.5
+	github.com/openrelayxyz/xplugeth v0.0.0-build-test2
 	github.com/pelletier/go-toml v1.9.5
 	github.com/peterh/liner v1.2.2
 	github.com/protolambda/bls12-381-util v0.1.0
