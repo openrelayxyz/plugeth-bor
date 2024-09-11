@@ -1,6 +1,7 @@
 package state
 
 import (
+	"fmt"
 	"bytes"
 	"time"
 
@@ -15,6 +16,26 @@ import (
 var (
 	acctCheckTimer = metrics.NewRegisteredTimer("plugeth/statedb/accounts/checks", nil)
 )
+
+type pluginSnapshot struct {
+	root common.Hash
+}
+
+func (s *pluginSnapshot) Root() common.Hash {
+	return s.root
+}
+
+func (s *pluginSnapshot) Account(hash common.Hash) (*types.SlimAccount, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *pluginSnapshot) AccountRLP(hash common.Hash) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *pluginSnapshot) Storage(accountHash, storageHash common.Hash) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
 
 type acctChecker struct {
 	snap snapshot.Snapshot
