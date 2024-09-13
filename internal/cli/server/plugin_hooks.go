@@ -6,9 +6,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/ethereum/go-ethereum/plugins"
 	"github.com/ethereum/go-ethereum/plugins/wrappers"
+	"github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/openrelayxyz/plugeth-utils/core"
 	"github.com/openrelayxyz/plugeth-utils/restricted"
@@ -16,7 +16,7 @@ import (
 
 // The following code is idiosyncratic to the plugeth-bor light implementaion
 
-type DummyContext struct {}
+type DummyContext struct{}
 
 func (*DummyContext) Set(string, string) error {
 	log.Warn("The Set function is being returned off of a placeholder context object.")
@@ -41,7 +41,7 @@ func plugethArgs() {
 	if plugins.DefaultPluginLoader == nil {
 		log.Warn("Attempting Plugeth_args, but default PluginLoader has not been initialized")
 		return
-		}
+	}
 	PlugethArgs(plugins.DefaultPluginLoader)
 }
 
@@ -103,6 +103,8 @@ func InitializeNode(pl *plugins.PluginLoader, stack *node.Node, backend restrict
 			return false
 		}
 	})
+	plugins.InitializeNode(wrappers.NewNode(stack), backend)
+
 	for _, fni := range fnList {
 		switch fn := fni.(type) {
 		case func(core.Node, restricted.Backend):
@@ -141,19 +143,20 @@ func pluginsOnShutdown() {
 }
 
 func BlockChain(pl *plugins.PluginLoader) {
+	plugins.GatherData()
 	fnList := pl.Lookup("BlockChain", func(item interface{}) bool {
-			_, ok := item.(func())
-			return ok
+		_, ok := item.(func())
+		return ok
 	})
 	for _, fni := range fnList {
-			fni.(func())()
+		fni.(func())()
 	}
 }
 
 func pluginBlockChain() {
 	if plugins.DefaultPluginLoader == nil {
-			log.Warn("Attempting BlockChain, but default PluginLoader has not been initialized")
-			return
+		log.Warn("Attempting BlockChain, but default PluginLoader has not been initialized")
+		return
 	}
 	BlockChain(plugins.DefaultPluginLoader)
 }

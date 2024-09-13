@@ -3,8 +3,8 @@ package core
 import (
 	"encoding/json"
 	"math/big"
-	"time"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -118,6 +118,7 @@ func PluginNewHead(pl *plugins.PluginLoader, block *types.Block, hash common.Has
 	for i, l := range logs {
 		logBytes[i], _ = rlp.EncodeToBytes(l)
 	}
+	plugins.NewHead(blockBytes, core.Hash(hash), logBytes, td)
 	for _, fni := range fnList {
 		if fn, ok := fni.(func([]byte, core.Hash, [][]byte, *big.Int)); ok {
 			fn(blockBytes, core.Hash(hash), logBytes, td)
@@ -186,17 +187,17 @@ func pluginReorg(commonBlock *types.Block, oldChain, newChain types.Blocks) {
 }
 
 func PluginSetTrieFlushIntervalClone(pl *plugins.PluginLoader, flushInterval time.Duration) time.Duration {
-	fnList := pl.Lookup("SetTrieFlushIntervalClone", func(item interface{}) bool{
+	fnList := pl.Lookup("SetTrieFlushIntervalClone", func(item interface{}) bool {
 		_, ok := item.(func(time.Duration) time.Duration)
 		return ok
 	})
 	var snc sync.Once
 	if len(fnList) > 1 {
-		snc.Do(func() {log.Warn("The blockChain flushInterval value is being accessed by multiple plugins")})
+		snc.Do(func() { log.Warn("The blockChain flushInterval value is being accessed by multiple plugins") })
 	}
 	for _, fni := range fnList {
 		if fn, ok := fni.(func(time.Duration) time.Duration); ok {
-			flushInterval = fn(flushInterval) 
+			flushInterval = fn(flushInterval)
 		}
 	}
 	return flushInterval

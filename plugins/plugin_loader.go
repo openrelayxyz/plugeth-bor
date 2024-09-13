@@ -28,7 +28,7 @@ type PluginLoader struct {
 	Subcommands map[string]Subcommand
 	Flags       []*flag.FlagSet
 	LookupCache map[string][]interface{}
-	lock       sync.RWMutex
+	lock        sync.RWMutex
 }
 
 func (pl *PluginLoader) cacheLookup(name string) ([]interface{}, bool) {
@@ -194,7 +194,6 @@ func LookupOne[T any](pl *PluginLoader, name string) (T, bool) {
 	}
 	return items[0].(T), true
 }
-
 
 func ParseFlags(args []string) bool {
 	if DefaultPluginLoader == nil {

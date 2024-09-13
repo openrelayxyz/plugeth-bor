@@ -3,14 +3,15 @@ package state
 import (
 	"bytes"
 	"fmt"
+	"time"
+
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/plugins"
-	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/ethereum/go-ethereum/core/state/snapshot"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/ethereum/go-ethereum/plugins"
 	"github.com/openrelayxyz/plugeth-utils/core"
-	"time"
 )
 
 var (
@@ -38,6 +39,7 @@ func (s *pluginSnapshot) Storage(accountHash, storageHash common.Hash) ([]byte, 
 }
 
 func PluginStateUpdate(pl *plugins.PluginLoader, blockRoot, parentRoot common.Hash, snap snapshot.Snapshot, trie Trie, destructs map[common.Hash]struct{}, accounts map[common.Hash][]byte, storage map[common.Hash]map[common.Hash][]byte, codeUpdates map[common.Hash][]byte) {
+	log.Error("state update stR")
 	checker := &acctChecker{snap, trie}
 	fnList := pl.Lookup("StateUpdate", func(item interface{}) bool {
 		_, ok := item.(func(core.Hash, core.Hash, map[core.Hash]struct{}, map[core.Hash][]byte, map[core.Hash]map[core.Hash][]byte, map[core.Hash][]byte))
@@ -89,6 +91,8 @@ func PluginStateUpdate(pl *plugins.PluginLoader, blockRoot, parentRoot common.Ha
 		coreCode[core.Hash(k)] = v
 	}
 
+	plugins.StateUpdate(core.Hash(blockRoot), core.Hash(parentRoot), coreDestructs, coreAccounts, coreStorage, coreCode)
+
 	for _, fni := range fnList {
 		if fn, ok := fni.(func(core.Hash, core.Hash, map[core.Hash]struct{}, map[core.Hash][]byte, map[core.Hash]map[core.Hash][]byte, map[core.Hash][]byte)); ok {
 			fn(core.Hash(blockRoot), core.Hash(parentRoot), coreDestructs, coreAccounts, coreStorage, coreCode)
@@ -103,7 +107,6 @@ func pluginStateUpdate(blockRoot, parentRoot common.Hash, snap snapshot.Snapshot
 	}
 	PluginStateUpdate(plugins.DefaultPluginLoader, blockRoot, parentRoot, snap, trie, destructs, accounts, storage, codeUpdates)
 }
-
 
 type acctChecker struct {
 	snap snapshot.Snapshot

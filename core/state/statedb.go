@@ -1695,7 +1695,7 @@ func (s *StateDB) Commit(block uint64, deleteEmptyObjects bool) (common.Hash, er
 			storageTrieNodesDeleted += deleted
 		}
 	}
-	
+
 	if codeWriter.ValueSize() > 0 {
 		if err := codeWriter.Write(); err != nil {
 			log.Crit("Failed to commit dirty codes", "error", err)
@@ -1742,7 +1742,7 @@ func (s *StateDB) Commit(block uint64, deleteEmptyObjects bool) (common.Hash, er
 			//begin PluGeth code injection
 			pluginStateUpdate(root, parent, s.snap, s.trie, s.convertAccountSet(s.stateObjectsDestruct), s.accounts, s.storages, codeUpdates)
 			if _, ok := s.snap.(*pluginSnapshot); !ok && s.snaps != nil { // This if statement (but not its content) was added by PluGeth
-			//end PluGeth injection
+				//end PluGeth injection
 				if err := s.snaps.Update(root, parent, s.convertAccountSet(s.stateObjectsDestruct), s.accounts, s.storages); err != nil {
 					log.Warn("Failed to update snapshot tree", "from", parent, "to", root, "err", err)
 				}
@@ -1753,7 +1753,7 @@ func (s *StateDB) Commit(block uint64, deleteEmptyObjects bool) (common.Hash, er
 				if err := s.snaps.Cap(root, 128); err != nil {
 					log.Warn("Failed to cap snapshot tree", "root", root, "layers", 128, "err", err)
 				}
-			}	
+			}
 		}
 
 		if metrics.EnabledExpensive {

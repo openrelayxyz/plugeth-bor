@@ -115,7 +115,7 @@ func NewServer(config *Config, opts ...serverOption) (*Server, error) {
 	// begin PluGeth injection
 	pluginsDir := filepath.Join(config.DataDir, "plugins")
 	if err := plugins.Initialize(pluginsDir, &DummyContext{}); err != nil {
-		return nil,  err
+		return nil, err
 	}
 	plugethArgs()
 	//end PluGeth injection
@@ -272,7 +272,7 @@ func NewServer(config *Config, opts ...serverOption) (*Server, error) {
 	pluginsInitializeNode(stack, wrapperBackend)
 
 	stack.RegisterAPIs(pluginGetAPIs(stack, wrapperBackend))
-	
+
 	// end PluGeth injection
 
 	// debug tracing is enabled by default
