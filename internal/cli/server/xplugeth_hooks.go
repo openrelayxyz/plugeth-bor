@@ -1,31 +1,41 @@
 package server
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/openrelayxyz/xplugeth"
 	"github.com/openrelayxyz/xplugeth/types"
+	"github.com/openrelayxyz/xplugeth/hooks/apis"
+	"github.com/openrelayxyz/xplugeth/hooks/initialize"
 	
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
-type initializer interface {
-	InitializeNode(*node.Node, types.Backend)
-}
-type shutdown interface {
-	Shutdown()
-}
-type blockchain interface {
-	Blockchain()	
-}
-type getAPIs interface {
-	GetAPIs(*node.Node, types.Backend) []rpc.API
+func isValidPath(path string) bool {
+    cleanPath := filepath.Clean(path)
+
+    fileInfo, err := os.Stat(cleanPath)
+    if err != nil {
+        return false
+    }
+    return fileInfo.IsDir()
 }
 
-func init() {
-	xplugeth.RegisterHook[initializer]()
-	xplugeth.RegisterHook[shutdown]()
-	xplugeth.RegisterHook[blockchain]()
-	xplugeth.RegisterHook[getAPIs]()
+
+func pluginsConfig() string {
+	pluginsConfigEnv := os.Getenv("PLUGINS_CONFIG")
+	
+	if pluginsConfigEnv != "" && isValidPath(pluginsConfigEnv) {
+		log.Error("path provided", "path", pluginsConfigEnv)
+		return pluginsConfigEnv
+	} else {
+		log.Error("plugins config path not provided or invalid")
+		return ""
+	}
+	
 }
 
 func pluginInitializeNode() {
@@ -37,7 +47,7 @@ func pluginInitializeNode() {
 	if !ok {
 		panic("types.Backend singleton not set, xplugeth Initializenode")
 	}
-	for _, init := range xplugeth.GetModules[initializer]() {
+	for _, init := range xplugeth.GetModules[initialize.Initializer]() {
 		init.InitializeNode(stack, backend)
 	}
 }
@@ -54,7 +64,7 @@ func pluginGetAPIs() []rpc.API {
 		panic("types.Backend singleton not set xplugeth GetAPIs")
 	}
 
-	for _, a := range xplugeth.GetModules[getAPIs]() {
+	for _, a := range xplugeth.GetModules[apis.GetAPIs]() {
 		result = append(result, a.GetAPIs(stack, backend)...)
 	}
 
@@ -62,13 +72,13 @@ func pluginGetAPIs() []rpc.API {
 }
 
 func pluginOnShutdown() {
-	for _, shutdown := range xplugeth.GetModules[shutdown]() {
+	for _, shutdown := range xplugeth.GetModules[initialize.Shutdown]() {
 		shutdown.Shutdown()
 	}
 }
 
 func pluginBlockchain() {
-	for _, b := range xplugeth.GetModules[blockchain]() {
+	for _, b := range xplugeth.GetModules[initialize.Blockchain]() {
 		b.Blockchain()
 	}
 }
