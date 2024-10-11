@@ -137,6 +137,7 @@ func NewServer(config *Config, opts ...serverOption) (*Server, error) {
 	//begin xplugeth injection
 	if !disablePlugins() {
 		xplugeth.Initialize(pluginsConfig())
+		log.Info("xplugeth initialized")
 	}
 	//end xplugeth injection
 
