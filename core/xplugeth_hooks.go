@@ -5,43 +5,22 @@ import (
 	"sync"
 	"time"
 
+	"github.com/openrelayxyz/xplugeth"
+	"github.com/openrelayxyz/xplugeth/hooks/blockchain"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/openrelayxyz/xplugeth"
 )
 
-type newHeadPlugin interface {
-	NewHead(block *types.Block, hash common.Hash, logs []*types.Log, td *big.Int)
-}
-
-type newSideBlockPlugin interface {
-	NewSideBlock(block *types.Block, hash common.Hash, logs []*types.Log)
-}
-
-type reorgPlugin interface {
-	Reorg(commonBlock common.Hash, oldChain, newChain []common.Hash)
-}
-
-type setTrieFlushIntervalClonePlugin interface {
-	SetTrieFlushIntervalClone(flushInterval time.Duration) time.Duration
-}
-
-func init() {
-	xplugeth.RegisterHook[newHeadPlugin]()
-	xplugeth.RegisterHook[newSideBlockPlugin]()
-	xplugeth.RegisterHook[reorgPlugin]()
-	xplugeth.RegisterHook[setTrieFlushIntervalClonePlugin]()
-}
-
 func pluginNewHead(block *types.Block, hash common.Hash, logs []*types.Log, td *big.Int) {
-	for _, m := range xplugeth.GetModules[newHeadPlugin]() {
+	for _, m := range xplugeth.GetModules[blockchain.NewHeadPlugin]() {
 		m.NewHead(block, hash, logs, td)
 	}
 }
 
 func pluginNewSideBlock(block *types.Block, hash common.Hash, logs []*types.Log) {
-	for _, m := range xplugeth.GetModules[newSideBlockPlugin]() {
+	for _, m := range xplugeth.GetModules[blockchain.NewSideBlockPlugin]() {
 		m.NewSideBlock(block, hash, logs)
 	}
 }
@@ -55,18 +34,18 @@ func pluginReorg(commonBlock *types.Block, oldChain, newChain types.Blocks) {
 	for i, block := range newChain {
 		newChainHashes[i] = block.Hash()
 	}
-	for _, m := range xplugeth.GetModules[reorgPlugin]() {
+	for _, m := range xplugeth.GetModules[blockchain.ReorgPlugin]() {
 		m.Reorg(commonBlock.Hash(), oldChainHashes, newChainHashes)
 	}
 }
 
 func pluginSetTrieFlushIntervalClone(flushInterval time.Duration) time.Duration {
-	modules := xplugeth.GetModules[setTrieFlushIntervalClonePlugin]()
+	m := xplugeth.GetModules[blockchain.SetTrieFlushIntervalClonePlugin]()
 	var snc sync.Once
-	if len(modules) > 1 {
+	if len(m) > 1 {
 		snc.Do(func() { log.Warn("The blockChain flushInterval value is being accessed by multiple plugins") })
 	}
-	for _, m := range modules {
+	for _, m := range m {
 		flushInterval = m.SetTrieFlushIntervalClone(flushInterval)
 	}
 	return flushInterval

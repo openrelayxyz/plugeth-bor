@@ -2,38 +2,23 @@ package rawdb
 
 import (
 	"sync"
-
-	"github.com/ethereum/go-ethereum/log"
+	"reflect"
+	
 	"github.com/openrelayxyz/xplugeth"
+	"github.com/openrelayxyz/xplugeth/hooks/modifyancients"
+
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/rlp"
+	
 )
 
 var (
 	freezerUpdates          map[uint64]map[string]interface{}
 	lock                    sync.Mutex
-	modifyAncientsInjection *bool
-	appendRawInjection      *bool
-	appendInjection         *bool
 )
 
-type modifyAncientsPlugin interface {
-	ModifyAncients(uint64, map[string]interface{})
-}
-
-func init() {
-	xplugeth.RegisterHook[modifyAncientsPlugin]()
-}
-
 func PluginTrackUpdate(num uint64, kind string, value interface{}) {
-
-	if appendRawInjection != nil {
-		called := true
-		appendRawInjection = &called
-	}
-
-	if appendInjection != nil {
-		called := true
-		appendInjection = &called
-	}
 
 	lock.Lock()
 	defer lock.Unlock()
@@ -49,11 +34,7 @@ func PluginTrackUpdate(num uint64, kind string, value interface{}) {
 }
 
 func pluginCommitUpdate(num uint64) {
-	if modifyAncientsInjection != nil {
-		called := true
-		modifyAncientsInjection = &called
-	}
-
+	
 	lock.Lock()
 	defer lock.Unlock()
 	if freezerUpdates == nil {
@@ -65,6 +46,7 @@ func pluginCommitUpdate(num uint64) {
 			min = i
 		}
 	}
+
 	for i := min; i < num; i++ {
 		update, ok := freezerUpdates[i]
 		defer func(i uint64) { delete(freezerUpdates, i) }(i)
@@ -72,8 +54,31 @@ func pluginCommitUpdate(num uint64) {
 			log.Warn("Attempting to commit untracked block", "num", i)
 			continue
 		}
-		for _, m := range xplugeth.GetModules[modifyAncientsPlugin]() {
-			m.ModifyAncients(i, update)
+		if len(xplugeth.GetModules[modifyancients.ModifyAncientsPlugin]()) > 0 {
+			var keys []string
+			for k := range update {
+				keys = append(keys, k)
+			}
+			if headeri, ok := update[ChainFreezerHeaderTable]; ok {
+				var h types.Header
+				switch v := headeri.(type) {
+				case []byte:
+					err := rlp.DecodeBytes(v, &h)
+					if err != nil {
+						log.Error("error decoding header, commit update", "err", err)
+						continue
+					}
+				case *types.Header:
+					log.Error("second case")
+					h = *v
+				default:
+					log.Error("header of unknown type", "type", reflect.TypeOf(headeri))
+					continue
+				}
+				for _, m := range xplugeth.GetModules[modifyancients.ModifyAncientsPlugin]() {
+					m.ModifyAncients(num, &h)
+				}
+			}
 		}
 	}
 }

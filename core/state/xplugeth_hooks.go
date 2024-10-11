@@ -5,12 +5,14 @@ import (
 	"bytes"
 	"time"
 
+	"github.com/openrelayxyz/xplugeth"
+	"github.com/openrelayxyz/xplugeth/hooks/stateupdates"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/state/snapshot"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/openrelayxyz/xplugeth"
 )
 
 var (
@@ -44,15 +46,6 @@ type acctChecker struct {
 
 type acctByHasher interface {
 	GetAccountByHash(common.Hash) (*types.StateAccount, error)
-}
-
-type stateUpdatePlugin interface {
-	StateUpdate(blockRoot, parentRoot common.Hash, snap snapshot.Snapshot, trie Trie, destructs map[common.Hash]struct{}, accounts map[common.Hash][]byte, storage map[common.Hash]map[common.Hash][]byte, codeUpdates map[common.Hash][]byte)
-}
-
-func init() {
-	xplugeth.RegisterHook[stateUpdatePlugin]()
-
 }
 
 func (ac *acctChecker) exists(k common.Hash) bool {
@@ -126,8 +119,8 @@ func pluginStateUpdate(blockRoot, parentRoot common.Hash, snap snapshot.Snapshot
 	}
 	acctCheckTimer.UpdateSince(start)
 
-	for _, m := range xplugeth.GetModules[stateUpdatePlugin]() {
-		m.StateUpdate(blockRoot, parentRoot, snap, trie, filteredDestructs, filteredAccounts, storage, codeUpdates)
+	for _, m := range xplugeth.GetModules[stateupdates.StateUpdatePlugin]() {
+		m.StateUpdate(blockRoot, parentRoot, filteredDestructs, filteredAccounts, storage, codeUpdates)
 	}
 }
 
