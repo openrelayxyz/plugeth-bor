@@ -3,6 +3,7 @@ package server
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/openrelayxyz/xplugeth"
 	"github.com/openrelayxyz/xplugeth/types"
@@ -24,6 +25,19 @@ func isValidPath(path string) bool {
     return fileInfo.IsDir()
 }
 
+func disablePlugins() bool {
+    val := os.Getenv("DISABLE_PLUGINS")
+    if len(val) > 0 {
+    	truthyValues := []string{"true", "1", "yes", "y"}
+    	for _, truthy := range truthyValues {
+        	if strings.EqualFold(val, truthy) {
+            	return true
+        	}
+    	}
+	}
+    return false
+}
+
 
 func pluginsConfig() string {
 	pluginsConfigEnv := os.Getenv("PLUGINS_CONFIG")
@@ -32,7 +46,7 @@ func pluginsConfig() string {
 		log.Info("plugins config path provided", "path", pluginsConfigEnv)
 		return pluginsConfigEnv
 	} 
-	
+
 	log.Info("plugins config path not provided or invalid")
 	return ""
 }

@@ -135,7 +135,9 @@ func NewServer(config *Config, opts ...serverOption) (*Server, error) {
 	}
 
 	//begin xplugeth injection
-	xplugeth.Initialize(pluginsConfig())
+	if !disablePlugins() {
+		xplugeth.Initialize(pluginsConfig())
+	}
 	//end xplugeth injection
 
 	// load the chain genesis
