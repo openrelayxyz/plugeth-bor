@@ -27,15 +27,14 @@ func isValidPath(path string) bool {
 
 func pluginsConfig() string {
 	pluginsConfigEnv := os.Getenv("PLUGINS_CONFIG")
-	
+
 	if pluginsConfigEnv != "" && isValidPath(pluginsConfigEnv) {
-		log.Error("path provided", "path", pluginsConfigEnv)
+		log.Info("plugins config path provided", "path", pluginsConfigEnv)
 		return pluginsConfigEnv
-	} else {
-		log.Error("plugins config path not provided or invalid")
-		return ""
-	}
+	} 
 	
+	log.Info("plugins config path not provided or invalid")
+	return ""
 }
 
 func pluginInitializeNode() {
