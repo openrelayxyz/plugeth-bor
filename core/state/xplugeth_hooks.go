@@ -23,6 +23,11 @@ type pluginSnapshot struct {
 	root common.Hash
 }
 
+// This function is being brought over from foundation to enable our producer plugin to work agnostically across networks.
+func (s *StateDB) GetTrie() Trie {
+	return s.trie
+}
+
 func (s *pluginSnapshot) Root() common.Hash {
 	return s.root
 }
