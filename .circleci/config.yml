@@ -79,6 +79,24 @@ jobs:
           command: |
               ./slack-post.sh -w $SLACK_WEBHOOK -m "*plugeth-bor2*:\nTag: $CIRCLE_TAG \n"
 
+  trigger-xplugeth-manifest:
+    docker: # run the steps with Docker
+      - image: cimg/go:1.22.0 # ...with this image as the primary container
+      # this is where all `steps` will run
+    steps:
+      - checkout
+      - run:
+          name: Prep paramters and the curl
+          command: |
+            test_build_cardinal_bor=true
+            card_bor_producer_version="$CIRCLE_TAG"
+            card-bor-blockupdates-version="$CIRCLE_TAG"
+
+
+            echo "curl call xplugeth-manifest with cardinal-bor Parameters for merge/*** branch in plugeth-bor"
+            # curl -X POST https://circleci.com/api/v2/project/github/openrelayxyz/xplugeth-manifest/pipeline --header "Content-Type: application/json" --header "Accept: application/json" --header "Circle-Token: ${CIRCLECI_API_TOKEN}" -d '{ "branch": "circleci-project-setup", "parameters": { "test-build-cardinal-bor": '"$test_build_cardinal_bor"', "card-bor-producer-version": "'"$card_bor_producer_version"'", "card-bor-blockupdates-version": "'"$card_bor_blockupdates_version"'" } }'
+
+
 workflows:
   version: 2
   test:
@@ -102,3 +120,28 @@ workflows:
           filters:
             tags:
               only: /^v.*/
+
+  build_and_test_and_trigger:
+    jobs:
+      - test:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - build_geth_push:
+          context: Rivet
+          requires:
+            - test
+          filters:
+            tags:
+              only: /^v.*/
+      - trigger-xplugeth-manifest:
+            context: Rivet
+            requires:
+              - build_geth_push
+            filters:
+              tags:
+                only: /^v.*/
+              branches:
+                only: feature/trigger-xplugeth-maifest
