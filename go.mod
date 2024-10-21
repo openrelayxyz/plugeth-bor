@@ -2,8 +2,6 @@ module github.com/ethereum/go-ethereum
 
 go 1.22
 
-toolchain go1.22.1
-
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.3.2
 	github.com/BurntSushi/toml v1.4.0
@@ -69,6 +67,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/naoina/toml v0.1.1
 	github.com/olekukonko/tablewriter v0.0.5
+	github.com/openrelayxyz/xplugeth v0.1.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/peterh/liner v1.2.2
 	github.com/protolambda/bls12-381-util v0.1.0
@@ -206,6 +205,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/go-redsync/redsync/v4 v4.0.4 // indirect
+	github.com/go-yaml/yaml v2.1.0+incompatible // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible // indirect
