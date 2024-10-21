@@ -60,3 +60,6 @@ dist
 logs/
 
 tests/spec-tests/
+
+# xplugeth_imports
+/internal/cli/server/xplugeth_hooks.go
