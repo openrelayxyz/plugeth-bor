@@ -206,15 +206,6 @@ func New(root common.Hash, db Database, snaps *snapshot.Tree) (*StateDB, error) 
 	if sdb.snaps != nil {
 		sdb.snap = sdb.snaps.Snapshot(root)
 	}
-	// Start PluGeth section
-	if sdb.snap == nil {
-		log.Debug("Snapshots not availble. Using plugin snapshot.")
-		sdb.snap = &pluginSnapshot{root}
-		sdb.stateObjectsDestruct = make(map[common.Address]*types.StateAccount)
-		sdb.accounts = make(map[common.Hash][]byte)
-		sdb.storages = make(map[common.Hash]map[common.Hash][]byte)
-	}
-	// End PluGeth section
 	return sdb, nil
 }
 
@@ -1450,7 +1441,7 @@ func (s *StateDB) clearJournalAndRefund() {
 func (s *StateDB) fastDeleteStorage(addrHash common.Hash, root common.Hash) (common.StorageSize, map[common.Hash][]byte, *trienode.NodeSet, error) {
 	// begin PluGeth Injection // this injection is neccessary to enable the native geth tests in core/state to pass
 	if _, err := s.snap.Account(addrHash); err != nil {
-		return false, 0, nil, nil, err
+		return 0, nil, nil, err
 	}
 	// end PluGeth Injection	
 	iter, err := s.snaps.StorageIterator(s.originalRoot, addrHash, common.Hash{})
@@ -1674,9 +1665,6 @@ func (s *StateDB) commit(deleteEmptyObjects bool) (*stateUpdate, error) {
 			return nodes.Merge(set)
 		}
 	)
-	// begin PluGeth injection
-	codeUpdates := make(map[common.Hash][]byte)
-	// end PluGeth injection
 
 	// Given that some accounts could be destroyed and then recreated within
 	// the same block, account deletions must be processed first. This ensures
@@ -1733,9 +1721,6 @@ func (s *StateDB) commit(deleteEmptyObjects bool) (*stateUpdate, error) {
 		// Write any contract code associated with the state object
 		obj := s.stateObjects[addr]
 		if obj == nil {
-			// begin PluGeth injection
-			codeUpdates[common.BytesToHash(obj.CodeHash())] = obj.code
-			// end PluGeth injection
 			return nil, errors.New("missing state object")
 		}
 		// Run the storage updates concurrently to one another
@@ -1787,6 +1772,19 @@ func (s *StateDB) commitAndFlush(block uint64, deleteEmptyObjects bool) (*stateU
 	if err != nil {
 		return nil, err
 	}
+
+	// begin PluGeth injection
+	codeUpdates := make(map[common.Hash][]byte)
+	for _, code := range ret.codes {
+		if len(code.blob) > 0 {
+			// Empty code may or may not be included in this list by Geth based on
+			// factors I'm not certain of, so to normalize our pending batches,
+			// exclude empty blobs.
+			codeUpdates[code.hash] = code.blob
+		}
+	}
+	// end PluGeth injection
+
 	// Commit dirty contract code if any exists
 	if db := s.db.DiskDB(); db != nil && len(ret.codes) > 0 {
 		batch := db.NewBatch()
@@ -1800,12 +1798,12 @@ func (s *StateDB) commitAndFlush(block uint64, deleteEmptyObjects bool) (*stateU
 	if !ret.empty() {
 		// If snapshotting is enabled, update the snapshot tree with this new version
 		if s.snap != nil {
-			s.snap = nil
-
-			start := time.Now()
 			//begin PluGeth code injection
-			pluginStateUpdate(root, parent, s.snap, s.trie, s.convertAccountSet(s.stateObjectsDestruct), s.accounts, s.storages, codeUpdates)
+			pluginStateUpdate(ret.root, ret.originRoot, s.snap, s.trie, ret.destructs, ret.accounts, ret.storages, codeUpdates)
 			//end PluGeth code injection			
+			s.snap = nil
+			
+			start := time.Now()
 			if err := s.snaps.Update(ret.root, ret.originRoot, ret.destructs, ret.accounts, ret.storages); err != nil {
 				log.Warn("Failed to update snapshot tree", "from", ret.originRoot, "to", ret.root, "err", err)
 			}
