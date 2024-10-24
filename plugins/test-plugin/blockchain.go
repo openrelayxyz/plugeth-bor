@@ -100,10 +100,8 @@ func txFactory() {
 		log.Error("Error connecting with client txFactory", "err", err)
 	}
 
-	err = client.Call(&coinBase, "eth_coinbase")
-	if err != nil {
-		log.Error("failed to call eth_coinbase txFactory", "err", err)
-	}
+	cb := core.HexToAddress("4204477bf7fce868e761caaba991ffc607717dbf")
+	coinBase = &cb
 
 	var peerCount hexutil.Uint64
 	for peerCount == 0 {
