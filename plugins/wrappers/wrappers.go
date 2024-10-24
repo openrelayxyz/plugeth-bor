@@ -21,7 +21,7 @@ func NewWrappedStateDB(d *state.StateDB) *WrappedStateDB {
 
 // GetBalance(Address) *big.Int
 func (w *WrappedStateDB) GetBalance(addr core.Address) *big.Int {
-	return new(big.Int).SetBytes(w.s.GetBalance(common.Address(addr)).Bytes())
+	return w.s.GetBalance(common.Address(addr)).ToBig()
 }
 
 // GetNonce(Address) uint64
@@ -97,7 +97,6 @@ func (w *WrappedStateDB) AddBalance(addr core.Address, amount *big.Int) {
 	castAmount := new(uint256.Int)
 	w.s.AddBalance(common.Address(addr), castAmount.SetBytes(amount.Bytes()), 0)
 }
-// TODO AR the above internal function signature needs review
 
 type Node struct {
 	n *node.Node

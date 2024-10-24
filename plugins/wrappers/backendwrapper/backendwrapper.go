@@ -3,6 +3,7 @@ package backendwrapper
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 	"reflect"
@@ -44,10 +45,16 @@ type Backend struct {
 	removedLogsOnce sync.Once
 	chainConfig     *params.ChainConfig
 }
-// TODO AR review addition of db to backend type
 
 func NewBackend(b ethapi.Backend) *Backend {
-	return &Backend{b: b}
+	state, _, err := b.StateAndHeaderByNumber(context.Background(), 0)
+	if err != nil {
+		panic(err.Error())
+	}
+	return &Backend{
+		b: b,
+		db: state.Database(),
+	}
 }
 
 func (b *Backend) SuggestGasTipCap(ctx context.Context) (*big.Int, error) {
@@ -125,14 +132,16 @@ func (b *Backend) SendTx(ctx context.Context, signedTx []byte) error {
 	return b.b.SendTx(ctx, tx)
 }
 func (b *Backend) GetTransaction(ctx context.Context, txHash core.Hash) ([]byte, core.Hash, uint64, uint64, error) { // RLP Encoded transaction {
-	_, tx, blockHash, blockNumber, index, err := b.b.GetTransaction(ctx, common.Hash(txHash))
+	found, tx, blockHash, blockNumber, index, err := b.b.GetTransaction(ctx, common.Hash(txHash))
 	if err != nil {
 		return nil, core.Hash(blockHash), blockNumber, index, err
+	}
+	if !found {
+		return nil, core.Hash(blockHash), blockNumber, index, errors.New("not found returned from GetTransaction")
 	}
 	enc, err := tx.MarshalBinary()
 	return enc, core.Hash(blockHash), blockNumber, index, err
 }
-// TODO AR the above internal function signature needs review
 func (b *Backend) GetPoolTransactions() ([][]byte, error) {
 	txs, err := b.b.GetPoolTransactions()
 	if err != nil {
