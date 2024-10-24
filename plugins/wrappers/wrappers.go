@@ -3,6 +3,8 @@ package wrappers
 import (
 	"math/big"
 
+	"github.com/holiman/uint256"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/node"
@@ -19,7 +21,7 @@ func NewWrappedStateDB(d *state.StateDB) *WrappedStateDB {
 
 // GetBalance(Address) *big.Int
 func (w *WrappedStateDB) GetBalance(addr core.Address) *big.Int {
-	return w.s.GetBalance(common.Address(addr))
+	return new(big.Int).SetBytes(w.s.GetBalance(common.Address(addr)).Bytes())
 }
 
 // GetNonce(Address) uint64
@@ -92,8 +94,10 @@ func (w *WrappedStateDB) IntermediateRoot(deleteEmptyObjects bool) core.Hash {
 }
 
 func (w *WrappedStateDB) AddBalance(addr core.Address, amount *big.Int) {
-	w.s.AddBalance(common.Address(addr), amount)
+	castAmount := new(uint256.Int)
+	w.s.AddBalance(common.Address(addr), castAmount.SetBytes(amount.Bytes()), 0)
 }
+// TODO AR the above internal function signature needs review
 
 type Node struct {
 	n *node.Node

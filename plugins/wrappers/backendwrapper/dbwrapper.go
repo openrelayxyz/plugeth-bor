@@ -21,7 +21,7 @@ func (d *dbWrapper) Has(key []byte) (bool, error)             { return d.db.Has(
 func (d *dbWrapper) Get(key []byte) ([]byte, error)           { return d.db.Get(key) }
 func (d *dbWrapper) Put(key []byte, value []byte) error       { return d.db.Put(key, value) }
 func (d *dbWrapper) Delete(key []byte) error                  { return d.db.Delete(key) }
-func (d *dbWrapper) Stat(property string) (string, error)     { return d.db.Stat(property) }
+func (d *dbWrapper) Stat(property string) (string, error)     { return d.db.Stat() }
 func (d *dbWrapper) Compact(start []byte, limit []byte) error { return d.db.Compact(start, limit) }
 func (d *dbWrapper) HasAncient(kind string, number uint64) (bool, error) {
 	return d.db.HasAncient(kind, number)
