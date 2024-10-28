@@ -1,14 +1,9 @@
-# Polygon Technology Security Information
+# Security Policy
 
-## Link to vulnerability disclosure details (Bug Bounty)
-- Websites and Applications: https://hackerone.com/polygon-technology
-- Smart Contracts: https://immunefi.com/bounty/polygon
 
-## Languages that our team speaks and understands.
-Preferred-Languages: en
 
-## Security-related job openings at Polygon.
-https://polygon.technology/careers
+Please see [Releases](https://github.com/openrelayxyz/plugeth/releases) for notes on each release. We recommend using the most recently released version.
 
-## Polygon security contact details
-security@polygon.technology
+To report security issues in the underlying Geth code code please see Geth's security policy [here](https://github.com/ethereum/go-ethereum/security/policy).
+
+To report PluGeth specific issues please email [security@rivet.cloud](mailto:security@rivet.cloud).
