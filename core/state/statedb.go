@@ -1661,6 +1661,7 @@ func (s *StateDB) commit(deleteEmptyObjects bool) (*stateUpdate, error) {
 			return nodes.Merge(set)
 		}
 	)
+
 	// Given that some accounts could be destroyed and then recreated within
 	// the same block, account deletions must be processed first. This ensures
 	// that the storage trie nodes deleted during destruction and recreated
@@ -1767,6 +1768,7 @@ func (s *StateDB) commitAndFlush(block uint64, deleteEmptyObjects bool) (*stateU
 	if err != nil {
 		return nil, err
 	}
+
 	// Commit dirty contract code if any exists
 	if db := s.db.DiskDB(); db != nil && len(ret.codes) > 0 {
 		batch := db.NewBatch()
@@ -1780,8 +1782,11 @@ func (s *StateDB) commitAndFlush(block uint64, deleteEmptyObjects bool) (*stateU
 	if !ret.empty() {
 		// If snapshotting is enabled, update the snapshot tree with this new version
 		if s.snap != nil {
+			//begin xplugeth code injection
+			pluginStateUpdate(ret.root, ret.originRoot, s.snap, s.trie, ret.destructs, ret.accounts, ret.storages, ret.codes)
+			//end xplugeth code injection			
 			s.snap = nil
-
+			
 			start := time.Now()
 			if err := s.snaps.Update(ret.root, ret.originRoot, ret.destructs, ret.accounts, ret.storages); err != nil {
 				log.Warn("Failed to update snapshot tree", "from", ret.originRoot, "to", ret.root, "err", err)
