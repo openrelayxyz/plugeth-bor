@@ -41,6 +41,11 @@ import (
 	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/rpc"
 
+	//begin xplugeth injection	
+	"github.com/openrelayxyz/xplugeth"
+	xtypes "github.com/openrelayxyz/xplugeth/types"
+	//end xplugeth injection
+
 	// Force-load the tracer engines to trigger registration
 	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
 	_ "github.com/ethereum/go-ethereum/eth/tracers/native"
@@ -131,6 +136,13 @@ func NewServer(config *Config, opts ...serverOption) (*Server, error) {
 			return nil, err
 		}
 	}
+
+	//begin xplugeth injection
+	if !disablePlugins() {
+		xplugeth.Initialize(pluginsConfig())
+		log.Info("xplugeth initialized")
+	}
+	//end xplugeth injection
 
 	// load the chain genesis
 	if err = config.loadChain(); err != nil {
@@ -284,10 +296,22 @@ func NewServer(config *Config, opts ...serverOption) (*Server, error) {
 	// Set the node instance
 	srv.node = stack
 
+	//begin xplugeth injection
+	xplugeth.StoreSingleton[*node.Node](stack)
+	xplugeth.StoreSingleton[xtypes.Backend](srv.backend.APIBackend)
+	stack.RegisterAPIs(pluginGetAPIs())
+	//end xplugeth injection
+	
 	// start the node
 	if err := srv.node.Start(); err != nil {
 		return nil, err
 	}
+	
+	//begin xplugeth injection
+	pluginInitializeNode()
+	pluginBlockchain()
+	//end xplugeth injection
+	
 
 	return srv, nil
 }
@@ -307,6 +331,10 @@ func (s *Server) Stop() {
 			log.Error("Failed to shutdown open telemetry tracer")
 		}
 	}
+
+	//begin xplugeth injection
+	defer pluginOnShutdown()
+	//end xplugeth injection
 }
 
 func (s *Server) setupMetrics(config *TelemetryConfig, serviceName string) error {
