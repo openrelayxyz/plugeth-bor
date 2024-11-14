@@ -41,8 +41,10 @@ import (
 	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/rpc"
 
+	//begin xplugeth injection	
 	"github.com/openrelayxyz/xplugeth"
 	xtypes "github.com/openrelayxyz/xplugeth/types"
+	//end xplugeth injection
 
 	// Force-load the tracer engines to trigger registration
 	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
@@ -294,19 +296,19 @@ func NewServer(config *Config, opts ...serverOption) (*Server, error) {
 	// Set the node instance
 	srv.node = stack
 
-	// begin xplugeth injection
+	//begin xplugeth injection
 	xplugeth.StoreSingleton[*node.Node](stack)
 	xplugeth.StoreSingleton[xtypes.Backend](srv.backend.APIBackend)
-	pluginInitializeNode()
 	stack.RegisterAPIs(pluginGetAPIs())
-	// end xplugeth injection
-
+	//end xplugeth injection
+	
 	// start the node
 	if err := srv.node.Start(); err != nil {
 		return nil, err
 	}
-
+	
 	//begin xplugeth injection
+	pluginInitializeNode()
 	pluginBlockchain()
 	//end xplugeth injection
 	

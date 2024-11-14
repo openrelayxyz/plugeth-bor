@@ -206,6 +206,7 @@ func New(root common.Hash, db Database, snaps *snapshot.Tree) (*StateDB, error) 
 	if sdb.snaps != nil {
 		sdb.snap = sdb.snaps.Snapshot(root)
 	}
+
 	return sdb, nil
 }
 
@@ -1768,18 +1769,6 @@ func (s *StateDB) commitAndFlush(block uint64, deleteEmptyObjects bool) (*stateU
 		return nil, err
 	}
 
-	// begin PluGeth injection
-	codeUpdates := make(map[common.Hash][]byte)
-	for _, code := range ret.codes {
-		if len(code.blob) > 0 {
-			// Empty code may or may not be included in this list by Geth based on
-			// factors I'm not certain of, so to normalize our pending batches,
-			// exclude empty blobs.
-			codeUpdates[code.hash] = code.blob
-		}
-	}
-	// end PluGeth injection
-
 	// Commit dirty contract code if any exists
 	if db := s.db.DiskDB(); db != nil && len(ret.codes) > 0 {
 		batch := db.NewBatch()
@@ -1793,9 +1782,9 @@ func (s *StateDB) commitAndFlush(block uint64, deleteEmptyObjects bool) (*stateU
 	if !ret.empty() {
 		// If snapshotting is enabled, update the snapshot tree with this new version
 		if s.snap != nil {
-			//begin PluGeth code injection
-			pluginStateUpdate(ret.root, ret.originRoot, s.snap, s.trie, ret.destructs, ret.accounts, ret.storages, codeUpdates)
-			//end PluGeth code injection			
+			//begin xplugeth code injection
+			pluginStateUpdate(ret.root, ret.originRoot, s.snap, s.trie, ret.destructs, ret.accounts, ret.storages, ret.codes)
+			//end xplugeth code injection			
 			s.snap = nil
 			
 			start := time.Now()

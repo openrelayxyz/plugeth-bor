@@ -1776,10 +1776,10 @@ func (bc *BlockChain) writeKnownBlock(block *types.Block) error {
 // writeBlockWithState writes block, metadata and corresponding state data to the
 // database.
 func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.Receipt, logs []*types.Log, statedb *state.StateDB) ([]*types.Log, error) {
-	//begin PluGeth injection
+	//begin xplugeth injection
 	var interval time.Duration
 	_ = pluginSetTrieFlushIntervalClone(interval) // this is being called here to engage a testing scenario
-	//end PluGeth injection	
+	//end xplugeth injection	
 	// Calculate the total difficulty of the block
 	ptd := bc.GetTd(block.ParentHash(), block.NumberU64()-1)
 	if ptd == nil {
@@ -1874,9 +1874,9 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	flushInterval := time.Duration(bc.flushInterval.Load())
 	// If we exceeded time allowance, flush an entire trie to disk
 
-	// begin PluGeth code injection
+	//begin xplugeth code injection
 	flushInterval = pluginSetTrieFlushIntervalClone(flushInterval)
-	// end PluGeth code injection
+	//end xplugeth code injection
 
 	if bc.gcproc > flushInterval {
 		// If the header is missing (canonical chain behind), we're reorging a low
@@ -1952,17 +1952,17 @@ func (bc *BlockChain) writeBlockAndSetHead(ctx context.Context, block *types.Blo
 	if status == CanonStatTy {
 		bc.writeHeadBlock(block)
 	}
-	//begin PluGeth code injection
+	//begin xplugeth code injection
 	ptd := bc.GetTd(block.ParentHash(), block.NumberU64()-1)
 	if ptd == nil {
 		return NonStatTy, consensus.ErrUnknownAncestor
 	}
 	externTd := new(big.Int).Add(block.Difficulty(), ptd)
-	// end PluGeth code injection
+	//end xplugeth code injection
 	if status == CanonStatTy {
-		// begin plugeth injection
+		//begin xplugeth injection
 		pluginNewHead(block, block.Hash(), logs, externTd)
-		// end plugeth injection
+		//end xplugeth injection
 		bc.chainFeed.Send(ChainEvent{Block: block, Hash: block.Hash(), Logs: logs})
 
 		if len(logs) > 0 {
@@ -1988,9 +1988,9 @@ func (bc *BlockChain) writeBlockAndSetHead(ctx context.Context, block *types.Blo
 			// BOR
 		}
 	} else {
-		//begin PluGeth injection
+		//begin xplugeth injection
 		pluginNewSideBlock(block, block.Hash(), logs)
-		//end PluGeth injection
+		//end xplugeth injection
 		bc.chainSideFeed.Send(ChainSideEvent{Block: block})
 
 		bc.chain2HeadFeed.Send(Chain2HeadEvent{
@@ -2926,9 +2926,9 @@ func (bc *BlockChain) reorg(oldHead *types.Header, newHead *types.Block) error {
 			msg = "Large chain reorg detected"
 			logFn = log.Warn
 		}
-		//begin PluGeth code injection
+		//begin xplugeth code injection
 		pluginReorg(commonBlock, oldChain, newChain)
-		//end PluGeth code injection
+		//end xplugeth code injection
 		logFn(msg, "number", commonBlock.Number(), "hash", commonBlock.Hash(),
 			"drop", len(oldChain), "dropfrom", oldChain[0].Hash(), "add", len(newChain), "addfrom", newChain[0].Hash())
 		blockReorgAddMeter.Mark(int64(len(newChain)))
@@ -3162,14 +3162,14 @@ func (bc *BlockChain) SetCanonical(head *types.Block) (common.Hash, error) {
 		bc.logsFeed.Send(logs)
 	}
 
-	// begin PluGeth code injection
+	//begin xplugeth code injection
 	ptd := bc.GetTd(head.ParentHash(), head.NumberU64()-1)
 	externTd := ptd
 	if ptd != nil {
 		externTd = new(big.Int).Add(head.Difficulty(), ptd)
 	}
 	pluginNewHead(head, head.Hash(), logs, externTd)
-	// end PluGeth code injection
+	//end xplugeth code injection
 	bc.chainHeadFeed.Send(ChainHeadEvent{Block: head})
 
 	context := []interface{}{
