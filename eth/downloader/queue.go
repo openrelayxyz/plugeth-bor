@@ -720,10 +720,6 @@ func (q *queue) DeliverHeaders(id string, headers []*types.Header, hashes []comm
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
-	//begin PluGeth code injection
-	pluginPeerEval(id, headers, hashes)
-	//end PluGeth code injection
-
 	var logger log.Logger
 	if len(id) < 16 {
 		// Tests use short IDs, don't choke on them

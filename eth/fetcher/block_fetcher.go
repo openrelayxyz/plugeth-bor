@@ -515,6 +515,7 @@ func (f *BlockFetcher) loop() {
 							select {
 							case res := <-resCh:
 								res.Done <- nil
+								pluginPeerEval(peer, *res.Res.(*eth.BlockHeadersRequest))
 								f.FilterHeaders(peer, *res.Res.(*eth.BlockHeadersRequest), time.Now(), announcedAt)
 
 							case <-timeout.C:
