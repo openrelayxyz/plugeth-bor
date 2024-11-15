@@ -344,6 +344,7 @@ func (f *BlockFetcher) FilterBodies(peer string, transactions [][]*types.Transac
 // Loop is the main fetcher loop, checking and processing various notification
 // events.
 func (f *BlockFetcher) loop() {
+	log.Error("inside of loop function")
 	// Iterate the block fetching until a quit is requested
 	var (
 		fetchTimer    = time.NewTimer(0)
