@@ -516,6 +516,8 @@ func (f *BlockFetcher) loop() {
 							case res := <-resCh:
 								res.Done <- nil
 								f.FilterHeaders(peer, *res.Res.(*eth.BlockHeadersRequest), time.Now(), announcedAt)
+								log.Error("peer", "this is the peer id", peer)
+								pluginPeerEval(peer, *res.Res.(*eth.BlockHeadersRequest))
 
 							case <-timeout.C:
 								// The peer didn't respond in time. The request
