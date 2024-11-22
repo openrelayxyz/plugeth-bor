@@ -516,6 +516,7 @@ func (f *BlockFetcher) loop() {
 							case res := <-resCh:
 								res.Done <- nil
 								f.FilterHeaders(peer, *res.Res.(*eth.BlockHeadersRequest), time.Now(), announcedAt)
+								log.Warn("block_fetcher", "peer", peer)
 								// begin plugeth injection
 								pluginPeerEval(peer, *res.Res.(*eth.BlockHeadersRequest))
 								// end plugeth injection

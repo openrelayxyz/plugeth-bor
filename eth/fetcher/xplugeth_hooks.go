@@ -8,7 +8,7 @@ import (
 )
 
 func pluginPeerEval(id string, headers []*types.Header) {
-	log.Error("peer", "peer id", id)
+	log.Error("pluginPeerEval", "peer id", id)
 	for _, m := range xplugeth.GetModules[blockchain.PeerEvalPlugin]() {
 		m.PeerEval(id, headers)
 	}
