@@ -304,3 +304,5 @@ replace github.com/ethereum/go-ethereum => github.com/maticnetwork/bor v1.3.2
 replace github.com/Masterminds/goutils => github.com/Masterminds/goutils v1.1.1
 
 replace go.mongodb.org/mongo-driver => go.mongodb.org/mongo-driver v1.14.0
+
+replace github.com/openrelayxyz/xplugeth => /home/philip/src/rivet/plugeth_superspace/plugeth-internal/xplugeth

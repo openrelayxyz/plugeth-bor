@@ -18,6 +18,7 @@
 package fetcher
 
 import (
+	"fmt"
 	"errors"
 	"math/rand"
 	"time"
@@ -519,6 +520,7 @@ func (f *BlockFetcher) loop() {
 								log.Warn("block_fetcher", "peer", peer)
 								// begin plugeth injection
 								pluginPeerEval(peer, *res.Res.(*eth.BlockHeadersRequest))
+								fmt.Println("PeerEval plugin engaged")
 								// end plugeth injection
 
 							case <-timeout.C:
