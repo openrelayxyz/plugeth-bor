@@ -417,7 +417,6 @@ func (s *StateDB) ApplyMVWriteSet(writes []blockstm.WriteDescriptor) {
 
 			switch path.GetSubpath() {
 			case BalancePath:
-				// todo: @anshalshukla || @cffls - check balance change reason
 				s.SetBalance(addr, sr.GetBalance(addr), tracing.BalanceChangeUnspecified)
 			case NoncePath:
 				s.SetNonce(addr, sr.GetNonce(addr))
@@ -1094,9 +1093,6 @@ func (s *StateDB) createObject(addr common.Address) *stateObject {
 // consensus bug eventually.
 func (s *StateDB) CreateAccount(addr common.Address) {
 	s.createObject(addr)
-	// todo: @anshalshukla || @cffls
-	// Check the below MV Write, balance path change have been removed
-	MVWrite(s, blockstm.NewAddressKey(addr))
 }
 
 // CreateContract is used whenever a contract is created. This may be preceded
@@ -1106,13 +1102,14 @@ func (s *StateDB) CreateAccount(addr common.Address) {
 // correctly handle EIP-6780 'delete-in-same-transaction' logic.
 func (s *StateDB) CreateContract(addr common.Address) {
 	obj := s.getStateObject(addr)
+	if obj != nil {
+		obj = s.mvRecordWritten(obj)
+	}
 	if !obj.newContract {
 		obj.newContract = true
 		s.journal.append(createContractChange{account: addr})
 	}
 
-	// todo: @anshalshukla || @cffls
-	// Check the below MV Write, balance path change have been removed
 	MVWrite(s, blockstm.NewAddressKey(addr))
 }
 
